@@ -4602,7 +4602,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Copy", OWOP.cursors.select, OWOP.fx
 
 	_global.eventSys.emit(_conf.EVENTS.misc.toolsInitialized);
 });
-
+//tools tolbar
 _global.eventSys.once(_conf.EVENTS.init, function () {
 	exports.toolsWindow = toolsWindow = new _windowsys.GUIWindow('Tools', {}, function (wdow) {
 		wdow.container.id = "toole-container";
