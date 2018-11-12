@@ -5447,6 +5447,8 @@ var _conf = __webpack_require__(1);
 
 var _global = __webpack_require__(0);
 
+//tools position
+
 var cursors = exports.cursors = {
 	set: new Image(),
 	cursor: { imgpos: [0, 0], hotspot: [0, 0] },
@@ -5463,6 +5465,7 @@ var cursors = exports.cursors = {
 	wand: { imgpos: [3, 3], hotspot: [0, 0] },
 	shield: { imgpos: [2, 3], hotspot: [18, 18] },
 	kick: { imgpos: [2, 1], hotspot: [3, 6] },
+	areaprotect: { imgpos: [4, 0], hotspot: [0, 0] },
 	ban: { imgpos: [3, 0], hotspot: [10, 4] },
 	write: { imgpos: [1, 3], hotspot: [10, 4] // fix hotspot
 	} };
