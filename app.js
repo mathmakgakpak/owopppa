@@ -4077,6 +4077,202 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.erase, OW
 		});
 	}));
 
+	//Area Protect
+	addTool(new Tool('area protect', _tool_renderer.cursors.protect, _Fx.PLAYERFX.NONE, _conf.RANK.MODERATOR, function (tool) {
+		tool.setFxRenderer(function (fx, ctx, time) {
+			if (!fx.extra.isLocalPlayer) return 1;
+			var x = fx.extra.player.x;
+			var y = fx.extra.player.y;
+			var fxx = (Math.round(x / 256) * _conf.protocol.chunkSize - _canvas_renderer.camera.x) * _canvas_renderer.camera.zoom;
+			var fxy = (Math.round(y / 256) * _conf.protocol.chunkSize - _canvas_renderer.camera.y) * _canvas_renderer.camera.zoom;
+			var oldlinew = ctx.lineWidth;
+			ctx.lineWidth = 1;
+			if (tool.extra.end) {
+				var s = tool.extra.start;
+				var e = tool.extra.end;
+				var x = (s[0] * _conf.protocol.chunkSize - _canvas_renderer.camera.x) * _canvas_renderer.camera.zoom + 0.5;
+				var y = (s[1] * _conf.protocol.chunkSize - _canvas_renderer.camera.y) * _canvas_renderer.camera.zoom + 0.5;
+				var rw = e[0] - s[0];
+				var rh = e[1] - s[1];
+				var w = rw * _canvas_renderer.camera.zoom * _conf.protocol.chunkSize;
+				var h = rh * _canvas_renderer.camera.zoom * _conf.protocol.chunkSize;
+				ctx.beginPath();
+				ctx.rect(x, y, w, h);
+				ctx.globalAlpha = 1;
+				ctx.strokeStyle = "#FFFFFF";
+				ctx.stroke();
+				ctx.setLineDash([3, 4]);
+				ctx.strokeStyle = "#000000";
+				ctx.stroke();
+				if (tool.extra.isSure) {
+					ctx.globalAlpha = 0.6;
+					ctx.fillStyle = "#00EE00";
+					ctx.fill();
+				}
+				ctx.globalAlpha = 0.25 + Math.sin(time / 500) / 4;
+				ctx.fillStyle = _canvas_renderer.renderer.patterns.unloaded;
+				ctx.fill();
+				ctx.setLineDash([]);
+				var oldfont = ctx.font;
+				ctx.font = "16px sans-serif";
+				var txt = (tool.extra.isSure ? "Click again to confirm. " : !tool.extra.clicking ? "Left/Right click to protect/unprotect selected chunks. " : "") + '(' + Math.abs(rw) + 'x' + Math.abs(rh) + ')';
+				var txtx = window.innerWidth >> 1;
+				var txty = window.innerHeight >> 1;
+				txtx = Math.max(x, Math.min(txtx, x + w));
+				txty = Math.max(y, Math.min(txty, y + h));
+
+				(0, _canvas_renderer.drawText)(ctx, txt, txtx, txty, true);
+				ctx.font = oldfont;
+				ctx.lineWidth = oldlinew;
+				return 0;
+			} else {
+				ctx.beginPath();
+				ctx.moveTo(0, fxy + 0.5);
+				ctx.lineTo(window.innerWidth, fxy + 0.5);
+				ctx.moveTo(fxx + 0.5, 0);
+				ctx.lineTo(fxx + 0.5, window.innerHeight);
+
+				//ctx.lineWidth = 1;
+				ctx.globalAlpha = 1;
+				ctx.strokeStyle = "#FFFFFF";
+				ctx.stroke();
+				ctx.setLineDash([3]);
+				ctx.strokeStyle = "#000000";
+				ctx.stroke();
+
+				ctx.setLineDash([]);
+				ctx.lineWidth = oldlinew;
+				return 1;
+			}
+		});
+
+		tool.extra.start = null;
+		tool.extra.end = null;
+		tool.extra.clicking = false;
+		tool.extra.isSure = false;
+
+		var timeout = null;
+
+		var sure = function sure() {
+			if (tool.extra.isSure) {
+				clearTimeout(timeout);
+				timeout = null;
+				tool.extra.isSure = false;
+				return true;
+			}
+			tool.extra.isSure = true;
+			setTimeout(function () {
+				tool.extra.isSure = false;
+				timeout = null;
+			}, 1600);
+			return false;
+		};
+
+		tool.setEvent('mousedown', function (mouse, event) {
+			var get = {
+				rx: function rx() {
+					return mouse.tileX / _conf.protocol.chunkSize;
+				},
+				ry: function ry() {
+					return mouse.tileY / _conf.protocol.chunkSize;
+				},
+				x: function x() {
+					return Math.round(mouse.tileX / _conf.protocol.chunkSize);
+				},
+				y: function y() {
+					return Math.round(mouse.tileY / _conf.protocol.chunkSize);
+				}
+			};
+			var s = tool.extra.start;
+			var e = tool.extra.end;
+			var isInside = function isInside() {
+				return get.rx() >= s[0] && get.rx() < e[0] && get.ry() >= s[1] && get.ry() < e[1];
+			};
+			if (mouse.buttons === 1 && !tool.extra.end) {
+				tool.extra.start = [get.x(), get.y()];
+				tool.extra.clicking = true;
+				tool.setEvent('mousemove', function (mouse, event) {
+					if (tool.extra.start && mouse.buttons === 1) {
+						tool.extra.end = [get.x(), get.y()];
+						return 1;
+					}
+				});
+				var finish = function finish() {
+					tool.setEvent('mousemove mouseup deselect', null);
+					tool.extra.clicking = false;
+					var s = tool.extra.start;
+					var e = tool.extra.end;
+					if (e) {
+						if (s[0] === e[0] || s[1] === e[1]) {
+							tool.extra.start = null;
+							tool.extra.end = null;
+						}
+						if (s[0] > e[0]) {
+							var tmp = e[0];
+							e[0] = s[0];
+							s[0] = tmp;
+						}
+						if (s[1] > e[1]) {
+							var tmp = e[1];
+							e[1] = s[1];
+							s[1] = tmp;
+						}
+					}
+					_canvas_renderer.renderer.render(_canvas_renderer.renderer.rendertype.FX);
+				};
+				tool.setEvent('deselect', finish);
+				tool.setEvent('mouseup', function (mouse, event) {
+					if (!(mouse.buttons & 1)) {
+						finish();
+					}
+				});
+			} else if (mouse.buttons === 1 && tool.extra.end) {
+				if (isInside() && sure()) {
+					tool.extra.start = null;
+					tool.extra.end = null;
+					var _ref = [s[0], s[1], e[0] - s[0], e[1] - s[1]],
+					    x = _ref[0],
+					    y = _ref[1],
+					    w = _ref[2],
+					    h = _ref[3];
+
+					for (var i = x; i < x + w; i++) {
+						for (var j = y; j < y + h; j++) {
+							var chunk = _main.misc.world.getChunkAt(i, j);
+							if (chunk && !chunk.locked) {
+								_networking.net.protocol.protectChunk(i, j, 1);
+							}
+						}
+					}
+				} else if (!isInside()) {
+					tool.extra.start = null;
+					tool.extra.end = null;
+				}
+			} else if (mouse.buttons === 2 && tool.extra.end && isInside() && sure()) {
+				tool.extra.start = null;
+				tool.extra.end = null;
+				var _ref2 = [s[0], s[1], e[0] - s[0], e[1] - s[1]],
+				    x = _ref2[0],
+				    y = _ref2[1],
+				    w = _ref2[2],
+				    h = _ref2[3];
+
+				for (var i = x; i < x + w; i++) {
+					for (var j = y; j < y + h; j++) {
+						var chunk = _main.misc.world.getChunkAt(i, j);
+						if (chunk && chunk.locked) {
+							_networking.net.protocol.protectChunk(i, j, 0);
+						}
+					}
+				}
+			}
+      if (_networking.net.protocol.lockDraw == null) {
+        _networking.net.protocol.lockDraw = false;
+      } else if (_networking.net.protocol.lockDraw == true) {
+        _networking.net.protocol.lockDraw == true;
+      }
+		});
+	}));
 
 //protect tool
 addTool(new Tool('Protect', _tool_renderer.cursors.shield, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16, "#000000"), _conf.RANK.MODERATOR, function (tool) {
