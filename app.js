@@ -4078,7 +4078,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.erase, OW
 	}));
 
 	//Area Protect
-	addTool(new Tool('area protect', _tool_renderer.cursors.protect, _Fx.PLAYERFX.NONE, _conf.RANK.MODERATOR, function (tool) {
+	addTool(new Tool('Area Protect', _tool_renderer.cursors.shield, _Fx.PLAYERFX.NONE, _conf.RANK.MODERATOR, function (tool) {
 		tool.setFxRenderer(function (fx, ctx, time) {
 			if (!fx.extra.isLocalPlayer) return 1;
 			var x = fx.extra.player.x;
