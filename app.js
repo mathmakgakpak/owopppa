@@ -3691,7 +3691,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase
 	}));
 
 	// Area to PNG tool
-	addTool(new Tool('Export', _tool_renderer.cursors.select, _Fx.PLAYERFX.NONE, _conf.RANK.NONE, function (tool) {
+	addTool(new Tool('Export', _tool_renderer.cursors.cut, _Fx.PLAYERFX.NONE, _conf.RANK.NONE, function (tool) {
 		tool.setFxRenderer(function (fx, ctx, time) {
 			if (!fx.extra.isLocalPlayer) return 1;
 			var x = fx.extra.player.x;
@@ -4312,7 +4312,7 @@ addTool(new Tool('Protect', _tool_renderer.cursors.shield, _Fx.PLAYERFX.RECT_SEL
 }));
 
 //Copy tool
-OWOP.tool.addToolObject(new OWOP.tool.class("Copy", OWOP.cursors.select, OWOP.fx.player.NONE, OWOP.RANK.ADMIN, function (tool) {
+OWOP.tool.addToolObject(new OWOP.tool.class("Copy", OWOP.cursors.copy, OWOP.fx.player.NONE, OWOP.RANK.ADMIN, function (tool) {
     function drawText(ctx, str, x, y, centered) {
         ctx.strokeStyle = "#000000", ctx.fillStyle = "#FFFFFF", ctx.lineWidth = 2.5, ctx.globalAlpha = 0.5;
         if (centered) {
