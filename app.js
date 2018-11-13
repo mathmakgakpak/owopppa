@@ -3185,14 +3185,14 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 	}));
 	
 	//brush tool
-		addTool(new Tool('Brush', _tool_renderer.cursors.brush, _Fx.PLAYERFX.NONE, _conf.RANK.ADMIN, function (tool) {
+		/*addTool(new Tool('Brush', _tool_renderer.cursors.brush, _Fx.PLAYERFX.NONE, _conf.RANK.ADMIN, function (tool) {
     var brDiameter = 5; //Declaring variable for brush diameter.
     var rainbowPressed = null;    
     var lastX, lastY;
 
     tool.setEvent('mousedown mousemove', function (mouse, event) {
-    var usedButtons = 3; /* Left and right mouse buttons are always used... */
-    var color = mouse.buttons === 2 ? [255, 255, 255] : OWOP.player.selectedColor; /* White color if right clicking */
+    var usedButtons = 3;  //Left and right mouse buttons are always used... 
+    var color = mouse.buttons === 2 ? [255, 255, 255] : OWOP.player.selectedColor; //White color if right clicking
     switch (OWOP.mouse.buttons) {
         case 1:
         case 2:
@@ -3266,7 +3266,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
         win.addObj(Rbar);
     }).move(945, 32));
     }
-}));
+}));*/
 	
 //Text Tool
 OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.player.NONE, OWOP.RANK.USER, function(tool) {
