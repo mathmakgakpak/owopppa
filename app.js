@@ -1,16 +1,3 @@
-/*
-
-This is the client code for my version of world of pixels.
-I do not own this code, I simply have modified the default
-client of http://ourworldofpixels.com, using some of their
-administrators 3rd party scripts. I am grateful that they
-are allowing me to use this code, but I just wanted to
-state the majority of it is the default client from them
-so definitly go check their site out.
-
-- Sebastian
-
-*/
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -73,7 +60,7 @@ so definitly go check their site out.
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -107,7 +94,7 @@ exports.options = exports.PUBLIC_EVENTS = exports.EVENTS = exports.RANK = export
 
 var _global = __webpack_require__(0);
 
-var _misc = __webpack_require__(3);
+var _misc = __webpack_require__(2);
 
 var _toolset = __webpack_require__(18);
 
@@ -205,16 +192,16 @@ if ((0, _misc.storageEnabled)()) {
 
 var options = exports.options = (0, _misc.propertyDefaults)(userOptions, {
 	serverAddress: [{
-		default: !true,
-		title: 'Localhost',
-		proto: 'old',
-		url: 'ws://owopforfun.herokuapp.com',
-		maxRetries: 1
-	}, {
 		default: true,
 		title: 'Official server',
 		proto: 'old',
 		url: 'ws://owopforfun.herokuapp.com'
+	}, {
+		default: false,
+		title: 'Localhost',
+		proto: 'old',
+		url: 'ws://owopforfun.herokuapp.com',
+		maxRetries: 1
 	}], // The server address that websockets connect to
 	fallbackFps: 30, // Fps used if requestAnimationFrame is not supported
 	maxChatBuffer: 256, // How many chat messages to retain in the chatbox
@@ -223,7 +210,6 @@ var options = exports.options = (0, _misc.propertyDefaults)(userOptions, {
 	movementSpeed: 1, /* Pixels per tick */
 	defaultWorld: 'main',
 	enableSounds: true,
-	enableIdView: true,
 	defaultZoom: 16,
 	zoomStrength: 1,
 	zoomLimitMin: 1,
@@ -232,8 +218,12 @@ var options = exports.options = (0, _misc.propertyDefaults)(userOptions, {
 	toolSetUrl: _toolset2.default,
 	unloadedPatternUrl: _unloaded2.default,
 	backgroundUrl: null,
-	/* Bug only affects Windows users with an old Intel graphics card driver */
+	/* Bug only affects Windows users with an Intel graphics card,
+  * since we can't easily know the client's GPU,
+  * activate for all windows users ¯\_(ツ)_/¯
+  */
 	chunkBugWorkaround: false // navigator.userAgent.indexOf('Windows NT') !== -1
+	/* Did it get fixed? we'll know soon! */
 });
 
 if (options.chunkBugWorkaround) {
@@ -251,6 +241,275 @@ _global.eventSys.on(EVENTS.net.connecting, function (server) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.getTime = getTime;
+exports.setCookie = setCookie;
+exports.getCookie = getCookie;
+exports.cookiesEnabled = cookiesEnabled;
+exports.storageEnabled = storageEnabled;
+exports.propertyDefaults = propertyDefaults;
+exports.absMod = absMod;
+exports.htmlToElement = htmlToElement;
+exports.escapeHTML = escapeHTML;
+exports.mkHTML = mkHTML;
+exports.loadScript = loadScript;
+exports.eventOnce = eventOnce;
+exports.setTooltip = setTooltip;
+exports.waitFrames = waitFrames;
+exports.decompress = decompress;
+exports.line = line;
+
+var _color = __webpack_require__(4);
+
+var _global = __webpack_require__(0);
+
+_global.PublicAPI.util = {
+	getTime: getTime,
+	cookiesEnabled: cookiesEnabled,
+	storageEnabled: storageEnabled,
+	absMod: absMod,
+	escapeHTML: escapeHTML,
+	mkHTML: mkHTML,
+	setTooltip: setTooltip,
+	waitFrames: waitFrames,
+	line: line
+};
+
+var time = Date.now();
+function getTime(update) {
+	return update ? time = Date.now() : time;
+}
+
+function setCookie(name, value) {
+	document.cookie = name + '=' + value + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
+}
+
+function getCookie(name) {
+	var cookie = document.cookie.split(';');
+	for (var i = 0; i < cookie.length; i++) {
+		var idx = cookie[i].indexOf(name + '=');
+		if (idx === 0 || idx === 1 && cookie[i][0] === ' ') {
+			var off = idx + name.length + 1;
+			return cookie[i].substring(off, cookie[i].length);
+		}
+	}
+	return null;
+}
+
+function cookiesEnabled() {
+	return navigator.cookieEnabled;
+}
+
+function storageEnabled() {
+	try {
+		return !!window.localStorage;
+	} catch (e) {
+		return false;
+	}
+}
+
+function propertyDefaults(obj, defaults) {
+	if (obj) {
+		for (var prop in obj) {
+			if (obj.hasOwnProperty(prop)) {
+				defaults[prop] = obj[prop];
+			}
+		}
+	}
+	return defaults;
+}
+
+// This fixes modulo to work on negative numbers (-1 % 16 = 15)
+function absMod(n1, n2) {
+	return (n1 % n2 + n2) % n2;
+}
+
+function htmlToElement(html) {
+	return mkHTML("template", {
+		innerHTML: html
+	}).content.firstChild;
+}
+
+function escapeHTML(text) {
+	return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/\'/g, '&#39;').replace(/\//g, '&#x2F;');
+}
+
+/* Makes an HTML element with the values specified in opts */
+function mkHTML(tag, opts) {
+	var elm = document.createElement(tag);
+	for (var i in opts) {
+		elm[i] = opts[i];
+	}
+	return elm;
+}
+
+function loadScript(name, callback) {
+	document.getElementsByTagName('head')[0].appendChild(mkHTML("script", {
+		type: "text/javascript",
+		src: name,
+		onload: callback
+	}));
+}
+
+function eventOnce(element, events, func) {
+	var ev = events.split(' ');
+	var f = function f(e) {
+		for (var i = 0; i < ev.length; i++) {
+			element.removeEventListener(ev[i], f);
+		}
+		return func();
+	};
+
+	for (var i = 0; i < ev.length; i++) {
+		element.addEventListener(ev[i], f);
+	}
+}
+
+function setTooltip(element, message) {
+	var elementSpacing = 10;
+	var intr = 0;
+	var tip = null;
+	function tooltip() {
+		var epos = element.getBoundingClientRect();
+		var y = epos.top + epos.height / 2;
+		tip = mkHTML('span', {
+			innerHTML: message,
+			className: 'framed tooltip whitetext'
+		});
+		document.body.appendChild(tip);
+		var tpos = tip.getBoundingClientRect();
+		y -= tpos.height / 2;
+		var x = epos.left - tpos.width - elementSpacing;
+		if (x < elementSpacing) {
+			x = epos.right + elementSpacing;
+		}
+		tip.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px)';
+		intr = 0;
+	}
+	var mleave = function mleave(e) {
+		clearTimeout(intr);
+		intr = 0;
+		element.removeEventListener('mouseleave', mleave);
+		element.removeEventListener('click', mleave);
+		element.removeEventListener('DOMNodeRemoved', mleave);
+		if (tip !== null) {
+			tip.remove();
+			tip = null;
+		}
+	};
+	var menter = function menter(e) {
+		if (tip === null && intr === 0) {
+			intr = setTimeout(tooltip, 500);
+			element.addEventListener('click', mleave);
+			element.addEventListener('mouseleave', mleave);
+			element.addEventListener('DOMNodeRemoved', mleave);
+		}
+	};
+	/*var observer = new MutationObserver(e => { // Why does this not fire at all?
+ 	console.log(e, tip, intr);
+ 	if (e[0].removedNodes && (tip !== null || intr !== 0)) {
+ 		mleave();
+ 	}
+ });
+ observer.observe(element, { childList: true, subtree: true });*/
+	element.addEventListener('mouseenter', menter);
+}
+
+/* Waits n frames */
+function waitFrames(n, cb) {
+	window.requestAnimationFrame(function () {
+		return n > 0 ? waitFrames(--n, cb) : cb();
+	});
+}
+
+function decompress(u8arr) {
+	var originalLength = u8arr[1] << 8 | u8arr[0];
+	var u8decompressedarr = new Uint8Array(originalLength);
+	var numOfRepeats = u8arr[3] << 8 | u8arr[2];
+	var offset = numOfRepeats * 2 + 4;
+	var uptr = 0;
+	var cptr = offset;
+	for (var i = 0; i < numOfRepeats; i++) {
+		var currentRepeatLoc = (u8arr[4 + i * 2 + 1] << 8 | u8arr[4 + i * 2]) + offset;
+		while (cptr < currentRepeatLoc) {
+			u8decompressedarr[uptr++] = u8arr[cptr++];
+		}
+		var repeatedNum = u8arr[cptr + 1] << 8 | u8arr[cptr];
+		var repeatedColorR = u8arr[cptr + 2];
+		var repeatedColorG = u8arr[cptr + 3];
+		var repeatedColorB = u8arr[cptr + 4];
+		cptr += 5;
+		while (repeatedNum--) {
+			u8decompressedarr[uptr] = repeatedColorR;
+			u8decompressedarr[uptr + 1] = repeatedColorG;
+			u8decompressedarr[uptr + 2] = repeatedColorB;
+			uptr += 3;
+		}
+	}
+	while (cptr < u8arr.length) {
+		u8decompressedarr[uptr++] = u8arr[cptr++];
+	}
+	return u8decompressedarr;
+}
+
+/*function decompressu16(input) {
+	var originalLength = (((input[1] & 0xFF) << 8 | (input[0] & 0xFF)) + 1) * 2;
+	var output = new Uint8Array(originalLength);
+	var numOfRepeats = (input[3] & 0xFF) << 8 | (input[2] & 0xFF);
+	var offset = numOfRepeats * 2 + 4;
+	var uptr = 0;
+	var cptr = offset;
+	for (var i = 0; i < numOfRepeats; i++) {
+		var currentRepeatLoc = 2 * ((((input[4 + i * 2 + 1] & 0xFF) << 8) | (input[4 + i * 2] & 0xFF)))
+				+ offset;
+		while (cptr < currentRepeatLoc) {
+			output[uptr++] = input[cptr++];
+		}
+		var repeatedNum = ((input[cptr + 1] & 0xFF) << 8 | (input[cptr] & 0xFF)) + 1;
+		var repeatedColorRGB = (input[cptr + 3] & 0xFF) << 8 | (input[cptr + 2] & 0xFF);
+		cptr += 4;
+		while (repeatedNum-- != 0) {
+			output[uptr] = (repeatedColorRGB & 0xFF);
+			output[uptr + 1] = ((repeatedColorRGB & 0xFF00) >> 8);
+			uptr += 2;
+		}
+	}
+	while (cptr < input.length) {
+		output[uptr++] = input[cptr++];
+	}
+	return output;
+}*/
+
+function line(x1, y1, x2, y2, size, plot) {
+	var dx = Math.abs(x2 - x1),
+	    sx = x1 < x2 ? 1 : -1;
+	var dy = -Math.abs(y2 - y1),
+	    sy = y1 < y2 ? 1 : -1;
+	var err = dx + dy,
+	    e2;
+
+	while (true) {
+		plot(x1, y1);
+		if (x1 == x2 && y1 == y2) break;
+		e2 = 2 * err;
+		if (e2 >= dy) {
+			err += dy;x1 += sx;
+		}
+		if (e2 <= dx) {
+			err += dx;y1 += sy;
+		}
+	}
+}
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 /*
  * TODO List: https://trello.com/b/v6F6isSv/worldofpixels
  * NOTE: Let's stick with the correct way of storing colors,
@@ -262,7 +521,6 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.playerListWindow = exports.playerListTable = exports.playerList = exports.sounds = exports.misc = exports.elements = exports.mouse = exports.keysDown = exports.statusMsg = exports.showPlayerList = exports.showDevChat = undefined;
-exports.revealSecrets = revealSecrets;
 
 var _normalizeWheel = __webpack_require__(15);
 
@@ -274,7 +532,7 @@ var _conf = __webpack_require__(1);
 
 var _Bucket = __webpack_require__(9);
 
-var _misc = __webpack_require__(3);
+var _misc = __webpack_require__(2);
 
 var _global = __webpack_require__(0);
 
@@ -346,7 +604,6 @@ var elements = exports.elements = {
 };
 
 var misc = exports.misc = {
-	localStorage: (0, _misc.storageEnabled)() && window.localStorage,
 	_world: null,
 	lastXYDisplay: [-1, -1],
 	chatRecvModifier: function chatRecvModifier(msg) {
@@ -470,12 +727,7 @@ function receiveMessage(text) {
 			},
 			incCount: function incCount() {
 				var times = span.recvTimes || 1;
-				span.innerHTML = (0, _anchorme2.default)(text, {
-					attributes: [{
-						name: "target",
-						value: "blank"
-					}]
-				}) + ' [x' + ++times + ']';
+				span.innerHTML = text + ' [x' + ++times + ']';
 				span.recvTimes = times;
 				message.style.animation = 'none'; /* Reset fading anim */
 				message.offsetHeight; /* Reflow */
@@ -589,14 +841,6 @@ function closeChat() {
 
 function showDevChat(bool) {
 	elements.devChat.style.display = bool ? "" : "none";
-}
-
-function revealSecrets(bool) {
-	if (bool) {
-		_global.PublicAPI.net = _networking.net;
-	} else {
-		delete _global.PublicAPI.net;
-	}
 }
 
 function showPlayerList(bool) {
@@ -761,7 +1005,7 @@ function retryingConnect(serverGetter, worldName) {
 
 function saveWorldPasswords() {
 	if (misc.storageEnabled) {
-		misc.localStorage.worldPasswords = JSON.stringify(misc.worldPasswords);
+		localStorage.worldPasswords = JSON.stringify(misc.worldPasswords);
 	}
 }
 
@@ -792,9 +1036,9 @@ function init() {
 	var viewport = elements.viewport;
 	var chatinput = elements.chatInput;
 
-	if (misc.storageEnabled && misc.localStorage.worldPasswords) {
+	if (misc.storageEnabled && localStorage.worldPasswords) {
 		try {
-			misc.worldPasswords = JSON.parse(misc.localStorage.worldPasswords);
+			misc.worldPasswords = JSON.parse(localStorage.worldPasswords);
 		} catch (e) {}
 	}
 
@@ -833,15 +1077,15 @@ function init() {
 					chatHistory.unshift(text);
 					if (misc.storageEnabled) {
 						if (text.startsWith("/adminlogin ")) {
-							misc.localStorage.adminlogin = text.slice(12);
+							localStorage.adminlogin = text.slice(12);
 						} else if (text.startsWith("/modlogin ")) {
-							misc.localStorage.modlogin = text.slice(10);
+							localStorage.modlogin = text.slice(10);
 						} else if (text.startsWith("/nick")) {
 							var nick = text.slice(6);
 							if (nick.length) {
-								misc.localStorage.nick = nick;
+								localStorage.nick = nick;
 							} else {
-								delete misc.localStorage.nick;
+								delete localStorage.nick;
 							}
 						} else if (text.startsWith("/pass ") && misc.world) {
 							var pass = text.slice(6);
@@ -1126,13 +1370,8 @@ function init() {
 	viewport.addEventListener("touchend", touchEventNoUpdate('touchend'), { passive: true });
 	viewport.addEventListener("touchcancel", touchEventNoUpdate('touchcancel'), { passive: true });
 
-	elements.soundToggle.addEventListener('change', function (e) {
-		_conf.options.enableSounds = !elements.soundToggle.checked;
-	});
-	_conf.options.enableSounds = !elements.soundToggle.checked;
-
 	// Some cool custom css
-	console.log("%c" + " _ _ _         _   _    _____ ___    _____ _         _     \n" + "| | | |___ ___| |_| |  |     |  _|  |  _  |_|_ _ ___| |___ \n" + "| | | | . |  _| | . |  |  |  |  _|  |   __| |_'_| -_| |_ -|\n" + "|_____|___|_| |_|___|  |_____|_|    |__|  |_|_,_|___|_|___|", "font-size: 15px; font-weight: bold;");
+	console.log("%c" + "───────╔╗╔╗────────╔═══╦═══╦═══╗╔═══╦╗╔╗╔╦═══╦═══╗ \n" + "──────╔╝╚╣║────────║╔═╗║╔═╗║╔═╗║║╔═╗║║║║║║╔═╗║╔═╗║ \n" + "╔╗╔╦══╬╗╔╣╚═╦╦══╦══╬╝╔╝╠╝╔╝╠╝╔╝║║║─║║║║║║║║─║║╚═╝║ \n" + "║╚╝║╔╗║║║║╔╗╠╣╔╗║══╬╗╚╗║─║╔╝─║╔╝║║─║║╚╝╚╝║║─║║╔══╝ \n" + "║║║║╔╗║║╚╣║║║║╔╗╠══║╚═╝║─║║──║║─║╚═╝╠╗╔╗╔╣╚═╝║║ \n" + "╚╩╩╩╝╚╝╚═╩╝╚╩╩╝╚╩══╩═══╝─╚╝──╚╝─╚═══╝╚╝╚╝╚═══╩╝", "font-size: 15px; font-weight: bold;");
 	console.log("%cWelcome to the developer console!", "font-size: 20px; font-weight: bold; color: #F0F;");
 
 	//windowSys.addWindow(new OWOPDropDown());
@@ -1149,26 +1388,22 @@ function init() {
 	}
 
 	misc.urlWorldName = worldName;
-}
 
-function connect() {
 	var serverGetter = function (serverList) {
 		var defaults = [];
 		var availableServers = [];
 		for (var i = 0; i < serverList.length; i++) {
 			if (serverList[i].default) {
 				defaults.push(serverList[i]);
+			} else {
+				availableServers.push(serverList[i]);
 			}
-			availableServers.push(serverList[i]);
 		}
 		var index = 0;
 		return function (next) {
 			if (next) {
-				if (defaults.length) {
-					defaults.shift();
-				} else {
-					++index;
-				}
+				defaults.pop();
+				++index;
 			}
 			if (defaults.length) {
 				var sv = defaults[0];
@@ -1186,7 +1421,6 @@ function connect() {
 	};
 
 	misc.tickInterval = setInterval(tick, 1000 / _conf.options.tickSpeed);
-	//delete window.localStorage;
 }
 
 _global.eventSys.once(_conf.EVENTS.loaded, function () {
@@ -1197,19 +1431,7 @@ _global.eventSys.once(_conf.EVENTS.misc.logoMakeRoom, function () {
 	logoMakeRoom();
 });
 
-_global.eventSys.once(_conf.EVENTS.loaded, function () {
-	init();
-	if (misc.showEUCookieNag) {
-		_windowsys.windowSys.addWindow(new _windowsys.UtilDialog('Cookie notice', 'This box alerts you that we\'re going to use cookies!\nIf you don\'t accept their usage, disable cookies and reload the page.', false, function () {
-			(0, _misc.setCookie)('nagAccepted', 'true');
-			misc.showEUCookieNag = false;
-			logoMakeRoom(false);
-			connect();
-		}));
-	} else {
-		connect();
-	}
-});
+_global.eventSys.once(_conf.EVENTS.loaded, init);
 _global.eventSys.on(_conf.EVENTS.net.playerCount, updatePlayerCount);
 
 _global.eventSys.on(_conf.EVENTS.net.chat, receiveMessage);
@@ -1221,21 +1443,21 @@ _global.eventSys.on(_conf.EVENTS.net.world.setId, function (id) {
 	}
 
 	function autoNick() {
-		if (misc.localStorage.nick) {
-			_networking.net.protocol.sendMessage("/nick " + misc.localStorage.nick);
+		if (localStorage.nick) {
+			_networking.net.protocol.sendMessage("/nick " + localStorage.nick);
 		}
 	}
 
 	// Automatic login
-	var desiredRank = misc.localStorage.adminlogin ? _conf.RANK.ADMIN : misc.localStorage.modlogin ? _conf.RANK.MODERATOR : _networking.net.protocol.worldName in misc.worldPasswords ? _conf.RANK.USER : _conf.RANK.NONE;
+	var desiredRank = localStorage.adminlogin ? _conf.RANK.ADMIN : localStorage.modlogin ? _conf.RANK.MODERATOR : _networking.net.protocol.worldName in misc.worldPasswords ? _conf.RANK.USER : _conf.RANK.NONE;
 	if (desiredRank > _conf.RANK.NONE) {
 		var onWrong = function onWrong() {
 			console.log("WRONG");
 			_global.eventSys.removeListener(_conf.EVENTS.net.sec.rank, onCorrect);
 			if (desiredRank == _conf.RANK.ADMIN) {
-				delete misc.localStorage.adminlogin;
+				delete localStorage.adminlogin;
 			} else if (desiredRank == _conf.RANK.MODERATOR) {
-				delete misc.localStorage.modlogin;
+				delete localStorage.modlogin;
 			} else if (desiredRank == _conf.RANK.USER) {
 				delete misc.worldPasswords[_networking.net.protocol.worldName];
 				saveWorldPasswords();
@@ -1258,9 +1480,9 @@ _global.eventSys.on(_conf.EVENTS.net.world.setId, function (id) {
 		_global.eventSys.on(_conf.EVENTS.net.sec.rank, onCorrect);
 		var msg;
 		if (desiredRank == _conf.RANK.ADMIN) {
-			msg = "/adminlogin " + misc.localStorage.adminlogin;
+			msg = "/adminlogin " + localStorage.adminlogin;
 		} else if (desiredRank == _conf.RANK.MODERATOR) {
-			msg = "/modlogin " + misc.localStorage.modlogin;
+			msg = "/modlogin " + localStorage.modlogin;
 		} else if (desiredRank == _conf.RANK.USER) {
 			msg = "/pass " + misc.worldPasswords[_networking.net.protocol.worldName];
 		}
@@ -1360,8 +1582,6 @@ window.addEventListener("load", function () {
 
 	elements.chatInput = document.getElementById("chat-input");
 
-	elements.soundToggle = document.getElementById("no-sound");
-
 	document.getElementById("help-button").addEventListener("click", function () {
 		document.getElementById("help").className = "";
 	});
@@ -1402,275 +1622,6 @@ _global.PublicAPI.chat = {
 	}
 };
 _global.PublicAPI.sounds = sounds;
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-exports.getTime = getTime;
-exports.setCookie = setCookie;
-exports.getCookie = getCookie;
-exports.cookiesEnabled = cookiesEnabled;
-exports.storageEnabled = storageEnabled;
-exports.propertyDefaults = propertyDefaults;
-exports.absMod = absMod;
-exports.htmlToElement = htmlToElement;
-exports.escapeHTML = escapeHTML;
-exports.mkHTML = mkHTML;
-exports.loadScript = loadScript;
-exports.eventOnce = eventOnce;
-exports.setTooltip = setTooltip;
-exports.waitFrames = waitFrames;
-exports.decompress = decompress;
-exports.line = line;
-
-var _color = __webpack_require__(4);
-
-var _global = __webpack_require__(0);
-
-_global.PublicAPI.util = {
-	getTime: getTime,
-	cookiesEnabled: cookiesEnabled,
-	storageEnabled: storageEnabled,
-	absMod: absMod,
-	escapeHTML: escapeHTML,
-	mkHTML: mkHTML,
-	setTooltip: setTooltip,
-	waitFrames: waitFrames,
-	line: line
-};
-
-var time = Date.now();
-function getTime(update) {
-	return update ? time = Date.now() : time;
-}
-
-function setCookie(name, value) {
-	document.cookie = name + '=' + value + '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
-}
-
-function getCookie(name) {
-	var cookie = document.cookie.split(';');
-	for (var i = 0; i < cookie.length; i++) {
-		var idx = cookie[i].indexOf(name + '=');
-		if (idx === 0 || idx === 1 && cookie[i][0] === ' ') {
-			var off = idx + name.length + 1;
-			return cookie[i].substring(off, cookie[i].length);
-		}
-	}
-	return null;
-}
-
-function cookiesEnabled() {
-	return navigator.cookieEnabled;
-}
-
-function storageEnabled() {
-	try {
-		return !!window.localStorage;
-	} catch (e) {
-		return false;
-	}
-}
-
-function propertyDefaults(obj, defaults) {
-	if (obj) {
-		for (var prop in obj) {
-			if (obj.hasOwnProperty(prop)) {
-				defaults[prop] = obj[prop];
-			}
-		}
-	}
-	return defaults;
-}
-
-// This fixes modulo to work on negative numbers (-1 % 16 = 15)
-function absMod(n1, n2) {
-	return (n1 % n2 + n2) % n2;
-}
-
-function htmlToElement(html) {
-	return mkHTML("template", {
-		innerHTML: html
-	}).content.firstChild;
-}
-
-function escapeHTML(text) {
-	return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/\'/g, '&#39;').replace(/\//g, '&#x2F;');
-}
-
-/* Makes an HTML element with the values specified in opts */
-function mkHTML(tag, opts) {
-	var elm = document.createElement(tag);
-	for (var i in opts) {
-		elm[i] = opts[i];
-	}
-	return elm;
-}
-
-function loadScript(name, callback) {
-	document.getElementsByTagName('head')[0].appendChild(mkHTML("script", {
-		type: "text/javascript",
-		src: name,
-		onload: callback
-	}));
-}
-
-function eventOnce(element, events, func) {
-	var ev = events.split(' ');
-	var f = function f(e) {
-		for (var i = 0; i < ev.length; i++) {
-			element.removeEventListener(ev[i], f);
-		}
-		return func();
-	};
-
-	for (var i = 0; i < ev.length; i++) {
-		element.addEventListener(ev[i], f);
-	}
-}
-
-function setTooltip(element, message) {
-	var elementSpacing = 10;
-	var intr = 0;
-	var tip = null;
-	function tooltip() {
-		var epos = element.getBoundingClientRect();
-		var y = epos.top + epos.height / 2;
-		tip = mkHTML('span', {
-			innerHTML: message,
-			className: 'framed tooltip whitetext'
-		});
-		document.body.appendChild(tip);
-		var tpos = tip.getBoundingClientRect();
-		y -= tpos.height / 2;
-		var x = epos.left - tpos.width - elementSpacing;
-		if (x < elementSpacing) {
-			x = epos.right + elementSpacing;
-		}
-		tip.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px)';
-		intr = 0;
-	}
-	var mleave = function mleave(e) {
-		clearTimeout(intr);
-		intr = 0;
-		element.removeEventListener('mouseleave', mleave);
-		element.removeEventListener('click', mleave);
-		element.removeEventListener('DOMNodeRemoved', mleave);
-		if (tip !== null) {
-			tip.remove();
-			tip = null;
-		}
-	};
-	var menter = function menter(e) {
-		if (tip === null && intr === 0) {
-			intr = setTimeout(tooltip, 500);
-			element.addEventListener('click', mleave);
-			element.addEventListener('mouseleave', mleave);
-			element.addEventListener('DOMNodeRemoved', mleave);
-		}
-	};
-	/*var observer = new MutationObserver(e => { // Why does this not fire at all?
- 	console.log(e, tip, intr);
- 	if (e[0].removedNodes && (tip !== null || intr !== 0)) {
- 		mleave();
- 	}
- });
- observer.observe(element, { childList: true, subtree: true });*/
-	element.addEventListener('mouseenter', menter);
-}
-
-/* Waits n frames */
-function waitFrames(n, cb) {
-	window.requestAnimationFrame(function () {
-		return n > 0 ? waitFrames(--n, cb) : cb();
-	});
-}
-
-function decompress(u8arr) {
-	var originalLength = u8arr[1] << 8 | u8arr[0];
-	var u8decompressedarr = new Uint8Array(originalLength);
-	var numOfRepeats = u8arr[3] << 8 | u8arr[2];
-	var offset = numOfRepeats * 2 + 4;
-	var uptr = 0;
-	var cptr = offset;
-	for (var i = 0; i < numOfRepeats; i++) {
-		var currentRepeatLoc = (u8arr[4 + i * 2 + 1] << 8 | u8arr[4 + i * 2]) + offset;
-		while (cptr < currentRepeatLoc) {
-			u8decompressedarr[uptr++] = u8arr[cptr++];
-		}
-		var repeatedNum = u8arr[cptr + 1] << 8 | u8arr[cptr];
-		var repeatedColorR = u8arr[cptr + 2];
-		var repeatedColorG = u8arr[cptr + 3];
-		var repeatedColorB = u8arr[cptr + 4];
-		cptr += 5;
-		while (repeatedNum--) {
-			u8decompressedarr[uptr] = repeatedColorR;
-			u8decompressedarr[uptr + 1] = repeatedColorG;
-			u8decompressedarr[uptr + 2] = repeatedColorB;
-			uptr += 3;
-		}
-	}
-	while (cptr < u8arr.length) {
-		u8decompressedarr[uptr++] = u8arr[cptr++];
-	}
-	return u8decompressedarr;
-}
-
-/*function decompressu16(input) {
-	var originalLength = (((input[1] & 0xFF) << 8 | (input[0] & 0xFF)) + 1) * 2;
-	var output = new Uint8Array(originalLength);
-	var numOfRepeats = (input[3] & 0xFF) << 8 | (input[2] & 0xFF);
-	var offset = numOfRepeats * 2 + 4;
-	var uptr = 0;
-	var cptr = offset;
-	for (var i = 0; i < numOfRepeats; i++) {
-		var currentRepeatLoc = 2 * ((((input[4 + i * 2 + 1] & 0xFF) << 8) | (input[4 + i * 2] & 0xFF)))
-				+ offset;
-		while (cptr < currentRepeatLoc) {
-			output[uptr++] = input[cptr++];
-		}
-		var repeatedNum = ((input[cptr + 1] & 0xFF) << 8 | (input[cptr] & 0xFF)) + 1;
-		var repeatedColorRGB = (input[cptr + 3] & 0xFF) << 8 | (input[cptr + 2] & 0xFF);
-		cptr += 4;
-		while (repeatedNum-- != 0) {
-			output[uptr] = (repeatedColorRGB & 0xFF);
-			output[uptr + 1] = ((repeatedColorRGB & 0xFF00) >> 8);
-			uptr += 2;
-		}
-	}
-	while (cptr < input.length) {
-		output[uptr++] = input[cptr++];
-	}
-	return output;
-}*/
-
-function line(x1, y1, x2, y2, size, plot) {
-	var dx = Math.abs(x2 - x1),
-	    sx = x1 < x2 ? 1 : -1;
-	var dy = -Math.abs(y2 - y1),
-	    sy = y1 < y2 ? 1 : -1;
-	var err = dx + dy,
-	    e2;
-
-	while (true) {
-		plot(x1, y1);
-		if (x1 == x2 && y1 == y2) break;
-		e2 = 2 * err;
-		if (e2 >= dy) {
-			err += dy;x1 += sx;
-		}
-		if (e2 <= dx) {
-			err += dx;y1 += sy;
-		}
-	}
-}
 
 /***/ }),
 /* 4 */
@@ -1735,13 +1686,13 @@ var _conf = __webpack_require__(1);
 
 var _global = __webpack_require__(0);
 
-var _main = __webpack_require__(2);
+var _main = __webpack_require__(3);
 
 var _local_player = __webpack_require__(6);
 
 var _Fx = __webpack_require__(7);
 
-var _misc = __webpack_require__(3);
+var _misc = __webpack_require__(2);
 
 var _color = __webpack_require__(4);
 
@@ -2459,9 +2410,9 @@ var _global = __webpack_require__(0);
 
 var _conf = __webpack_require__(1);
 
-var _misc = __webpack_require__(3);
+var _misc = __webpack_require__(2);
 
-var _main = __webpack_require__(2);
+var _main = __webpack_require__(3);
 
 var _color = __webpack_require__(4);
 
@@ -2573,9 +2524,6 @@ var player = exports.player = {
 	},
 	get tools() {
 		return _tools.tools;
-	},
-	get id() {
-		return _networking.net.protocol.id;
 	}
 };
 
@@ -2709,14 +2657,12 @@ _global.eventSys.on(_conf.EVENTS.net.sec.rank, function (newRank) {
 		case _conf.RANK.NONE:
 			(0, _main.showDevChat)(false);
 			(0, _main.showPlayerList)(false);
-			(0, _main.revealSecrets)(false);
 			break;
 
 		case _conf.RANK.MODERATOR:
 		case _conf.RANK.ADMIN:
 			(0, _main.showDevChat)(true);
 			(0, _main.showPlayerList)(true);
-			(0, _main.revealSecrets)(true);
 			break;
 	}
 	(0, _tools.updateToolbar)();
@@ -2756,15 +2702,11 @@ var _color = __webpack_require__(4);
 
 var _conf = __webpack_require__(1);
 
-var _misc = __webpack_require__(3);
+var _misc = __webpack_require__(2);
 
 var _global = __webpack_require__(0);
 
 var _canvas_renderer = __webpack_require__(5);
-
-var _local_player = __webpack_require__(6);
-
-var _main = __webpack_require__(2);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2796,20 +2738,9 @@ var WORLDFX = exports.WORLDFX = {
 			}
 			var fxx = (x * size - _canvas_renderer.camera.x) * _canvas_renderer.camera.zoom;
 			var fxy = (y * size - _canvas_renderer.camera.y) * _canvas_renderer.camera.zoom;
-			var s = _canvas_renderer.camera.zoom * size;
 			ctx.globalAlpha = alpha;
 			ctx.strokeStyle = fx.extra.htmlRgb || "#000000";
-			ctx.strokeRect(fxx, fxy, s, s);
-			if (_conf.options.enableIdView && _local_player.player.rank >= _conf.RANK.MODERATOR && _canvas_renderer.camera.zoom >= 8 && fx.extra.tag) {
-				fxx += s;
-				var str = fx.extra.tag;
-				var ts = ctx.measureText(str).width;
-				ctx.fillStyle = "#FFFFFF";
-				ctx.strokeStyle = "#000000";
-				ctx.strokeText(str, fxx, fxy);
-				ctx.fillText(str, fxx, fxy);
-			}
-
+			ctx.strokeRect(fxx, fxy, _canvas_renderer.camera.zoom * size, _canvas_renderer.camera.zoom * size);
 			return 0; /* 0 = Animation not finished */
 		};
 	}
@@ -2881,12 +2812,10 @@ _global.PublicAPI.fx = {
 _global.eventSys.on(_conf.EVENTS.net.world.tilesUpdated, function (tiles) {
 	var time = (0, _misc.getTime)(true);
 	var made = false;
-
 	for (var i = 0; i < tiles.length; i++) {
 		var t = tiles[i];
-
 		if (_canvas_renderer.camera.isVisible(t.x, t.y, 1, 1)) {
-			new Fx(WORLDFX.RECT_FADE_ALIGNED(1, t.x, t.y), { htmlRgb: _color.colorUtils.toHTML(t.rgb ^ 0xFFFFFF), tag: '' + t.id });
+			new Fx(WORLDFX.RECT_FADE_ALIGNED(1, t.x, t.y), { htmlRgb: _color.colorUtils.toHTML(t.rgb ^ 0xFFFFFF) });
 			made = true;
 		}
 	}
@@ -2938,7 +2867,7 @@ var net = exports.net = {
 	connect: connect
 };
 
-//PublicAPI.net = net;
+_global.PublicAPI.net = net;
 
 function isConnected() {
 	return net.protocol !== null && net.protocol.isConnected();
@@ -2946,7 +2875,7 @@ function isConnected() {
 
 function connect(server, worldName) {
 	_global.eventSys.emit(_conf.EVENTS.net.connecting, server);
-	net.connection = new WebSocket(server.url);
+	net.connection = new WebSocket('wss://owopforfun.herokuapp.com');
 	net.connection.binaryType = "arraybuffer";
 	net.currentServer = server;
 	net.protocol = new server.proto.class(net.connection, worldName);
@@ -3024,7 +2953,7 @@ var _global = __webpack_require__(0);
 
 var _conf = __webpack_require__(1);
 
-var _misc = __webpack_require__(3);
+var _misc = __webpack_require__(2);
 
 var _tool_renderer = __webpack_require__(13);
 
@@ -3036,7 +2965,7 @@ var _canvas_renderer = __webpack_require__(5);
 
 var _windowsys = __webpack_require__(11);
 
-var _main = __webpack_require__(2);
+var _main = __webpack_require__(3);
 
 var _Fx = __webpack_require__(7);
 
@@ -3214,44 +3143,13 @@ _global.PublicAPI.tool = {
 };
 
 _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
-  
-  var rainbowPressed = false;
-  document.addEventListener("keydown", function customKeyBinds(e) {
-    if (e.which == 9) {
-      rainbowPressed = !rainbowPressed;
-      if (rainbowPressed == true) {
-        OWOP.chat.local('Server: Rainbow tools enabled.');
-      } else {
-        OWOP.chat.local('Server: Rainbow tools disabled.');
-      }
-    } else if (e.which == 69) {
-      OWOP.player.tool = "eraser";
-    } else if (e.which == 90) {
-      OWOP.player.tool = "zoom";
-    } else if (e.which == 66) {
-      OWOP.player.tool = "fill";
-    } else if (e.which == 76) {
-      OWOP.player.tool = "line";
-    // Quick command (might not work still)
-    } else if (e.which == 47) {
-      OWOP.elements.chat.className = "active selectable";
-      OWOP.elements.devChat.className = "active selectable";
-      OWOP.elements.chatMessages.className = "active";
-      OWOP.elements.chatInput.focus();
-    }
-  });
-
 	// Cursor tool
 	addTool(new Tool('Cursor', _tool_renderer.cursors.cursor, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(1), _conf.RANK.USER, function (tool) {
 		var lastX, lastY;
 		tool.setEvent('mousedown mousemove', function (mouse, event) {
 			var usedButtons = 3; /* Left and right mouse buttons are always used... */
 			/* White color if right clicking */
-      if (rainbowPressed == true) {
-			  var color = mouse.buttons === 2 ? [255, 255, 255] : [(Math.random()*255)|0, (Math.random()*255)|0, (Math.random()*255)|0];
-      } else {
-        var color = mouse.buttons === 2 ? [255, 255, 255] : OWOP.player.selectedColor; // I'm not doing that stupid _local_player.player. It's STUPID
-      }
+			var color = mouse.buttons === 2 ? [255, 255, 255] : _local_player.player.selectedColor;
 			switch (mouse.buttons) {
 				case 1:
 				case 2:
@@ -3285,8 +3183,195 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 			lastY = null;
 		});
 	}));
+	
+	//brush tool
+		addTool(new Tool('Brush', _tool_renderer.cursors.brush, _Fx.PLAYERFX.NONE, _conf.RANK.ADMIN, function (tool) {
+    var brDiameter = 5; //Declaring variable for brush diameter.
+    var rainbowPressed = null;    
+    var lastX, lastY;
 
-  // Add the brush tool here
+    tool.setEvent('mousedown mousemove', function (mouse, event) {
+    var usedButtons = 3;  //Left and right mouse buttons are always used... 
+    var color = mouse.buttons === 2 ? [255, 255, 255] : OWOP.player.selectedColor; //White color if right clicking
+    switch (OWOP.mouse.buttons) {
+        case 1:
+        case 2:
+            if (!lastX || !lastY) {
+                lastX = OWOP.mouse.tileX;
+                lastY = OWOP.mouse.tileY;
+            }
+            (0, OWOP.util.line)(lastX, lastY, OWOP.mouse.tileX, OWOP.mouse.tileY, 1, function (x, y) {
+                var pixel = OWOP.world.getPixel(x, y);
+                var R = Math.floor(brDiameter / 2);
+                if (pixel !== null) {
+                    if (!rainbowPressed && mouse.buttons == 1) {
+                    for(var ix = 0; ix < brDiameter;  ix++) {
+                      for(var iy = 0; iy < brDiameter; iy++) {
+                        OWOP.world.setPixel(x + ix - R, y + iy - R, color);
+                      }
+                    }
+                    } else if (rainbowPressed && mouse.buttons == 1) {
+                      for(var ix = 0; ix < brDiameter;  ix++) {
+                        for(var iy = 0; iy < brDiameter; iy++) {
+                          OWOP.world.setPixel(x + ix - R, y + iy - R, [(Math.random()*255)|0, (Math.random()*255)|0, (Math.random()*255)|0]);
+                        }
+                      }
+                    } else if (mouse.buttons == 2) {
+                      for(var ix = 0; ix < brDiameter;  ix++) {
+                        for(var iy = 0; iy < brDiameter; iy++) {
+                          OWOP.world.setPixel(x + ix - R, y + iy - R, [255,255,255]);
+                        }
+                      }
+                    }
+            }});
+            lastX = OWOP.mouse.tileX;
+            lastY = OWOP.mouse.tileY;
+            break;
+        case 4:
+            if (event.ctrlKey) {
+                usedButtons |= 4;
+                var color = _OWOP.world.getPixel(mouse.tileX, mouse.tileY);
+                if (color) {
+                    OWOP.player.selectedColor = color;
+                }
+            }
+            break;
+            }
+            return usedButtons;
+        });
+    tool.setEvent('mouseup', function (mouse) {
+    lastX = null;
+    lastY = null;
+    });
+    if (OWOP.player.rank == 3) {
+        var brDiamWin = OWOP.windowSys.addWindow(new OWOP.windowSys.class.window('Brush diameter', {}, function(win) {
+        win.container.title = 'Sets brush diameter. (duh)';
+        win.container.style.height = '16px';
+        win.container.style.overflow = 'hidden';
+
+        var brDiamElm = OWOP.util.mkHTML('span', { innerHTML: brDiameter });
+        win.addObj(brDiamElm);
+        var Rbar = OWOP.util.mkHTML('input', {
+            type: 'range', style: '-moz-appearance:none;-webkit-appearance:none;appearance:none;height:6px;outline:none;float:right;',
+            min: 2, max: 16,
+            value: brDiameter,
+            oninput: function() {
+                brDiameter = this.value;
+                brDiamElm.innerHTML = this.value;
+            }, ondblclick:function() {
+                this.value = 3; 
+                this.onchange();
+            }
+        });
+        win.addObj(Rbar);
+    }).move(945, 32));
+    }
+}));
+	
+//Text Tool
+OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.player.NONE, OWOP.RANK.USER, function(tool) {
+	var xPos = null;
+	var yPos = null;
+	var fonts = {};
+	var font = null;
+	
+	var fontInput = new OWOP.windowSys.class.input("Choose Font when no work do enter and say after u enter   . .", 955, "number", function(value) {
+		var id = parseInt(value);
+		if (id in fonts) {
+			font = id;
+			return;
+		}
+		
+		var xhttp = new XMLHttpRequest();
+        xhttp.addEventListener("load", function() {
+            var source = xhttp.responseXML.body.children[2].innerHTML;
+			var data = JSON.parse(source.match(/loadData\('(.+)'\)/)[1]);
+			var meta = source.match(/drawSample\('',([0-9]+),(-?[0-9]+)\)/);
+			data.letterspace = parseInt(meta[1]);
+			data.monospacewidth = parseInt(meta[2]);
+			
+            fonts[id] = data;
+			font = id;
+        });
+        xhttp.open("GET", "https://cors-anywhere.herokuapp.com/http://www.pentacom.jp/pentacom/bitfontmaker2/gallery/?id=" + id);
+        xhttp.responseType = "document";
+        xhttp.send();
+	});
+	
+	var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+    chars += "¡¢£€¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
+    chars += "ĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽž";
+	
+	tool.setFxRenderer(function (fx, ctx, time) {
+        var x = fx.extra.player.x;
+        var y = fx.extra.player.y;
+		if (xPos !== null && yPos !== null) {
+			x = xPos * 16;
+			y = yPos * 16;
+		}
+        var fxx = (Math.floor(x / 16) - OWOP.camera.x) * OWOP.camera.zoom;
+        var fxy = (Math.floor(y / 16) - OWOP.camera.y) * OWOP.camera.zoom;
+        ctx.globalAlpha = 0.8;
+        ctx.strokeStyle = fx.extra.player.htmlRgb;
+        ctx.strokeRect(fxx, fxy, OWOP.camera.zoom, OWOP.camera.zoom * 12);
+        return 0;
+    });
+	
+	tool.setEvent("select", function() {
+		OWOP.windowSys.addWindow(fontInput);
+	});
+	tool.setEvent("deselect", function() {
+		font = null;
+	});
+	
+	tool.setEvent("mousedown mousemove", function (mouse, event) {
+		if (mouse.buttons === 1) {
+			xPos = mouse.tileX;
+			yPos = mouse.tileY;
+		}
+	});
+	tool.setEvent("keydown", function() {return true;});
+	tool.setEvent("keyup", function() {return true;});
+	
+	window.addEventListener("keypress", function(event) {
+		if (font === null || xPos === null || yPos === null || ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+			return;
+		}
+		
+		var f = fonts[font];
+		var letterSpacing = (f.letterspace / 64 | 0) - 1;
+		var isMono = f.monospacewidth !== -1;
+		
+		if (event.which == 32) {
+			xPos += isMono ? f.monospacewidth : 4 + letterSpacing;
+			return;
+		}
+		
+		var char = f[event.which];
+		if (!char) {
+			return;
+		}
+		
+		var width = 0;
+        for (var y=0; y<16; y++) {
+            for (var x=0; x<16; x++) { 
+                if (char[y] & (1 << x) && x > width) width = x;
+            }
+        }
+		
+		var color = OWOP.player.palette[OWOP.player.paletteIndex];
+        for (var y=0; y<16; y++) {
+            for (var x=0; x<16; x++) {
+                if (!(char[y] & (1 << x))) {
+					continue;
+				}
+                OWOP.world.setPixel(xPos + x - 2, yPos + y, color);
+            }
+        }
+		
+		xPos += isMono ? f.monospacewidth : width + letterSpacing;
+	});
+}));
 
 	// Move tool
 	addTool(new Tool('Move', _tool_renderer.cursors.move, _Fx.PLAYERFX.NONE, _conf.RANK.NONE, function (tool) {
@@ -3322,48 +3407,9 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 			}
 		});
 	}));
-
-	// Erase/Fill tool
-	addTool(new Tool('Eraser', _tool_renderer.cursors.erase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.MODERATOR, function (tool) {
-		function fillChunk(chunkX, chunkY, c) {
-			var color = c[2] << 16 | c[1] << 8 | c[0];
-			var chunk = _main.misc.world.getChunkAt(chunkX, chunkY);
-			if (chunk) {
-				var empty = true;
-				firstLoop: for (var y = 0; y < _conf.protocol.chunkSize; y++) {
-					for (var x = 0; x < _conf.protocol.chunkSize; x++) {
-						if ((chunk.get(x, y) & 0xFFFFFF) != color) {
-							empty = false;
-							break firstLoop;
-						}
-					}
-				}
-				if (!empty) {
-					if (_networking.net.protocol.clearChunk(chunkX, chunkY, c)) {
-						chunk.set(color);
-					}
-				}
-			}
-		}
-
-		tool.setEvent('mousedown mousemove', function (mouse, event) {
-			if (mouse.buttons & 1) {
-        if (rainbowPressed == true) {
-          fillChunk(Math.floor(mouse.tileX / _conf.protocol.chunkSize), Math.floor(mouse.tileY / _conf.protocol.chunkSize), [(Math.random()*255)|0, (Math.random()*255)|0, (Math.random()*255)|0]);
-          return 1;
-        } else {
-          fillChunk(Math.floor(mouse.tileX / _conf.protocol.chunkSize), Math.floor(mouse.tileY / _conf.protocol.chunkSize), _local_player.player.selectedColor);
-          return 1;
-        }
-			} else if (mouse.buttons & 2) {
-				fillChunk(Math.floor(mouse.tileX / _conf.protocol.chunkSize), Math.floor(mouse.tileY / _conf.protocol.chunkSize), [255, 255, 255]);
-				return 1;
-			}
-		});
-	}));
-
-  // Area erase tool
-  addTool(new Tool('Areaerase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
+	
+	//Area Erase
+addTool(new Tool('Area erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
 		function drawText(ctx, str, x, y, centered) {
         ctx.strokeStyle = "#000000", ctx.fillStyle = "#FFFFFF", ctx.lineWidth = 2.5, ctx.globalAlpha = 0.5;
         if (centered) {
@@ -3534,11 +3580,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
                 for (var i = x; i < x + w; i++) {
                     for (var j = y; j < y + h; j++) {
                       if (mouse.buttons & 1) {
-                        if (rainbowPressed == true) {
-                          OWOP.net.protocol.clearChunk(i, j, [(Math.random()*255)|0, (Math.random()*255)|0, (Math.random()*255)|0]);
-                        } else {
-                          OWOP.net.protocol.clearChunk(i, j, OWOP.player.selectedColor);
-                        }
+                        OWOP.net.protocol.clearChunk(i, j, OWOP.player.selectedColor);
                       } else {
                         OWOP.net.protocol.clearChunk(i, j, [255,255,255]);
                       }
@@ -3550,6 +3592,39 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
             }
         }
     });
+	}));
+	
+	// Erase/Fill tool
+	addTool(new Tool('Eraser', _tool_renderer.cursors.erase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
+		function fillChunk(chunkX, chunkY, c) {
+			var color = c[2] << 16 | c[1] << 8 | c[0];
+			var chunk = _main.misc.world.getChunkAt(chunkX, chunkY);
+			if (chunk) {
+				var empty = true;
+				firstLoop: for (var y = 0; y < _conf.protocol.chunkSize; y++) {
+					for (var x = 0; x < _conf.protocol.chunkSize; x++) {
+						if ((chunk.get(x, y) & 0xFFFFFF) != color) {
+							empty = false;
+							break firstLoop;
+						}
+					}
+				}
+				if (!empty) {
+					chunk.set(color);
+					_networking.net.protocol.setChunk(chunkX, chunkY, new Array(256).fill(color));
+				}
+			}
+		}
+
+		tool.setEvent('mousedown mousemove', function (mouse, event) {
+			if (mouse.buttons & 1) {
+				fillChunk(Math.floor(mouse.tileX / _conf.protocol.chunkSize), Math.floor(mouse.tileY / _conf.protocol.chunkSize), _local_player.player.selectedColor);
+				return 1;
+			} else if (mouse.buttons & 2) {
+				fillChunk(Math.floor(mouse.tileX / _conf.protocol.chunkSize), Math.floor(mouse.tileY / _conf.protocol.chunkSize), [255, 255, 255]);
+				return 1;
+			}
+		});
 	}));
 
 	// Zoom tool
@@ -3599,7 +3674,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 	}));
 
 	// Area to PNG tool
-	addTool(new Tool('Export', _tool_renderer.cursors.select, _Fx.PLAYERFX.NONE, _conf.RANK.NONE, function (tool) {
+	addTool(new Tool('Export', _tool_renderer.cursors.cut, _Fx.PLAYERFX.NONE, _conf.RANK.NONE, function (tool) {
 		tool.setFxRenderer(function (fx, ctx, time) {
 			if (!fx.extra.isLocalPlayer) return 1;
 			var x = fx.extra.player.x;
@@ -3792,11 +3867,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 
 	// Fill tool
 	addTool(new Tool('Fill', _tool_renderer.cursors.fill, _Fx.PLAYERFX.NONE, _conf.RANK.USER, function (tool) {
-		if (OWOP.player.rank == 3) {
-      tool.extra.tickAmount = 40;
-    } else {
-      tool.extra.tickAmount = 6;
-    }
+		tool.extra.tickAmount = 6;
 		var queue = [];
 		var fillingColor = null;
 		var defaultFx = _Fx.PLAYERFX.RECT_SELECT_ALIGNED(1);
@@ -3830,12 +3901,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 				return;
 			}
 
-			var selClr = null;
-      if (rainbowPressed == true) {
-        selClr = [(Math.random()*255)|0, (Math.random()*255)|0, (Math.random()*255)|0];
-      } else {
-        selClr = OWOP.player.selectedColor;
-      }
+			var selClr = _local_player.player.selectedColor;
 			var painted = 0;
 			var tickAmount = tool.extra.tickAmount;
 			for (var painted = 0; painted < tickAmount && queue.length; painted++) {
@@ -3895,7 +3961,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 		});
 	}));
 
-  // Line tool
+	//Line Tool
 	addTool(new Tool('Line', _tool_renderer.cursors.wand, _Fx.PLAYERFX.NONE, _conf.RANK.USER, function (tool) {
 		var start = null;
 		var end = null;
@@ -3974,11 +4040,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 				}
 				if (_local_player.player.rank == _conf.RANK.ADMIN) {
 					line(start[0], start[1], end[0], end[1], function (x, y) {
-            if (rainbowPressed == true) {
-              _main.misc.world.setPixel(x, y, [(Math.random()*255)|0, (Math.random()*255)|0, (Math.random()*255)|0]);
-            } else {
-						  _main.misc.world.setPixel(x, y, OWOP.player.selectedColor);
-            }
+						_main.misc.world.setPixel(x, y, _local_player.player.selectedColor);
 					});
 					start = null;
 					end = null;
@@ -3998,150 +4060,8 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 		});
 	}));
 
-  // Text tool (Wont take the font input because of some cb not being a function error, gotta look into this)
-  addTool(new Tool('Text', _tool_renderer.cursors.text, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16, "#000000"), _conf.RANK.ADMIN, function (tool) {
-		var xPos = null;
-    var yPos = null;
-    var fonts = {};
-    var font = null;
-    
-    var fontInput = new OWOP.windowSys.class.input("Choose Font", 955,831 + 'or look up a font id', "number", function(value) {
-      var id = parseInt(value);
-      if (id in fonts) {
-        font = id;
-        return;
-      }
-      
-      var xhttp = new XMLHttpRequest();
-          xhttp.addEventListener("load", function() {
-              var source = xhttp.responseXML.body.children[2].innerHTML;
-        var data = JSON.parse(source.match(/loadData\('(.+)'\)/)[1]);
-        var meta = source.match(/drawSample\('',([0-9]+),(-?[0-9]+)\)/);
-        data.letterspace = parseInt(meta[1]);
-        data.monospacewidth = parseInt(meta[2]);
-        
-              fonts[id] = data;
-        font = id;
-          });
-          xhttp.open("GET", "https://cors-anywhere.herokuapp.com/http://www.pentacom.jp/pentacom/bitfontmaker2/gallery/?id=" + id);
-          xhttp.responseType = "document";
-          xhttp.send();
-    });
-    
-    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-      chars += "¡¢£€¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
-      chars += "ĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽž";
-    
-    tool.setFxRenderer(function (fx, ctx, time) {
-          var x = fx.extra.player.x;
-          var y = fx.extra.player.y;
-      if (xPos !== null && yPos !== null) {
-        x = xPos * 16;
-        y = yPos * 16;
-      }
-          var fxx = (Math.floor(x / 16) - OWOP.camera.x) * OWOP.camera.zoom;
-          var fxy = (Math.floor(y / 16) - OWOP.camera.y) * OWOP.camera.zoom;
-          ctx.globalAlpha = 0.8;
-          ctx.strokeStyle = fx.extra.player.htmlRgb;
-          ctx.strokeRect(fxx, fxy, OWOP.camera.zoom, OWOP.camera.zoom * 12);
-          return 0;
-      });
-    
-    tool.setEvent("select", function() {
-      OWOP.windowSys.addWindow(fontInput);
-    });
-    tool.setEvent("deselect", function() {
-      font = null;
-    });
-    
-    tool.setEvent("mousedown mousemove", function (mouse, event) {
-      if (mouse.buttons === 1) {
-        xPos = mouse.tileX;
-        yPos = mouse.tileY;
-      }
-    });
-    tool.setEvent("keydown", function() {return true;});
-    tool.setEvent("keyup", function() {return true;});
-    
-    window.addEventListener("keypress", function(event) {
-      if (font === null || xPos === null || yPos === null || ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
-        return;
-      }
-      
-      var f = fonts[font];
-      var letterSpacing = (f.letterspace / 64 | 0) - 1;
-      var isMono = f.monospacewidth !== -1;
-      
-      if (event.which == 32) {
-        xPos += isMono ? f.monospacewidth : 4 + letterSpacing;
-        return;
-      }
-      
-      var char = f[event.which];
-      if (!char) {
-        return;
-      }
-      
-      var width = 0;
-          for (var y=0; y<16; y++) {
-              for (var x=0; x<16; x++) { 
-                  if (char[y] & (1 << x) && x > width) width = x;
-              }
-          }
-      
-      var color = OWOP.player.palette[OWOP.player.paletteIndex];
-          for (var y=0; y<16; y++) {
-              for (var x=0; x<16; x++) {
-                  if (!(char[y] & (1 << x))) {
-            continue;
-          }
-                  OWOP.world.setPixel(xPos + x - 2, yPos + y, color);
-              }
-          }
-      
-      xPos += isMono ? f.monospacewidth : width + letterSpacing;
-    });
-	}));
-
-  // Chunk protect tool
-	addTool(new Tool('Protect', _tool_renderer.cursors.shield, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16, "#000000"), _conf.RANK.MODERATOR, function (tool) {
-		tool.setFxRenderer(function (fx, ctx, time) {
-			var x = fx.extra.player.x;
-			var y = fx.extra.player.y;
-			var fxx = (Math.floor(x / 256) * 16 - _canvas_renderer.camera.x) * _canvas_renderer.camera.zoom;
-			var fxy = (Math.floor(y / 256) * 16 - _canvas_renderer.camera.y) * _canvas_renderer.camera.zoom;
-			ctx.globalAlpha = 0.5;
-			var chunkX = Math.floor(fx.extra.player.tileX / _conf.protocol.chunkSize);
-			var chunkY = Math.floor(fx.extra.player.tileY / _conf.protocol.chunkSize);
-			var chunk = _main.misc.world.getChunkAt(chunkX, chunkY);
-			if (chunk) {
-				ctx.fillStyle = chunk.locked ? "#00FF00" : "#FF0000";
-				ctx.fillRect(fxx, fxy, _canvas_renderer.camera.zoom * 16, _canvas_renderer.camera.zoom * 16);
-			}
-			return 1; /* Rendering finished (won't change on next frame) */
-		});
-		tool.setEvent('mousedown mousemove', function (mouse) {
-			var chunkX = Math.floor(mouse.tileX / _conf.protocol.chunkSize);
-			var chunkY = Math.floor(mouse.tileY / _conf.protocol.chunkSize);
-			var chunk = _main.misc.world.getChunkAt(chunkX, chunkY);
-			switch (mouse.buttons) {
-				case 1:
-					if (!chunk.locked) {
-						_networking.net.protocol.protectChunk(chunkX, chunkY, 1);
-					}
-					break;
-
-				case 2:
-					if (chunk.locked) {
-						_networking.net.protocol.protectChunk(chunkX, chunkY, 0);
-					}
-					break;
-			}
-		});
-	}));
-
-  // Chunk select protect tool (Call the cursor area protect tool)
-	addTool(new Tool('Selectprotect', _tool_renderer.cursors.selectprotect, _Fx.PLAYERFX.NONE, _conf.RANK.MODERATOR, function (tool) {
+	//Area Protect
+	addTool(new Tool('Area Protect', _tool_renderer.cursors.areaprotect, _Fx.PLAYERFX.NONE, _conf.RANK.MODERATOR, function (tool) {
 		tool.setFxRenderer(function (fx, ctx, time) {
 			if (!fx.extra.isLocalPlayer) return 1;
 			var x = fx.extra.player.x;
@@ -4178,7 +4098,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 				ctx.setLineDash([]);
 				var oldfont = ctx.font;
 				ctx.font = "16px sans-serif";
-				var txt = (tool.extra.isSure ? "Click again to confirm. " : !tool.extra.clicking ? "Left/Right click to add/remove protection, respectively. " : "") + '(' + Math.abs(rw) + 'x' + Math.abs(rh) + ')';
+				var txt = (tool.extra.isSure ? "Click again to confirm. " : !tool.extra.clicking ? "Left/Right click to protect/unprotect selected chunks. " : "") + '(' + Math.abs(rw) + 'x' + Math.abs(rh) + ')';
 				var txtx = window.innerWidth >> 1;
 				var txty = window.innerHeight >> 1;
 				txtx = Math.max(x, Math.min(txtx, x + w));
@@ -4227,7 +4147,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 			setTimeout(function () {
 				tool.extra.isSure = false;
 				timeout = null;
-			}, 1000);
+			}, 1600);
 			return false;
 		};
 
@@ -4329,12 +4249,54 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 					}
 				}
 			}
+      if (_networking.net.protocol.lockDraw == null) {
+        _networking.net.protocol.lockDraw = false;
+      } else if (_networking.net.protocol.lockDraw == true) {
+        _networking.net.protocol.lockDraw == true;
+      }
 		});
 	}));
 
-  // Clone tool
-  addTool(new Tool('Clone', _tool_renderer.cursors.clone, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16, "#000000"), _conf.RANK.ADMIN, function (tool) {
-		function drawText(ctx, str, x, y, centered) {
+//protect tool
+addTool(new Tool('Protect', _tool_renderer.cursors.shield, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16, "#000000"), _conf.RANK.MODERATOR, function (tool) {
+	tool.setFxRenderer(function (fx, ctx, time) {
+		var x = fx.extra.player.x;
+		var y = fx.extra.player.y;
+		var fxx = (Math.floor(x / 256) * 16 - _canvas_renderer.camera.x) * _canvas_renderer.camera.zoom;
+		var fxy = (Math.floor(y / 256) * 16 - _canvas_renderer.camera.y) * _canvas_renderer.camera.zoom;
+		ctx.globalAlpha = 0.5;
+		var chunkX = Math.floor(fx.extra.player.tileX / _conf.protocol.chunkSize);
+		var chunkY = Math.floor(fx.extra.player.tileY / _conf.protocol.chunkSize);
+		var chunk = _main.misc.world.getChunkAt(chunkX, chunkY);
+		if (chunk) {
+			ctx.fillStyle = chunk.locked ? "#00FF00" : "#FF0000";
+			ctx.fillRect(fxx, fxy, _canvas_renderer.camera.zoom * 16, _canvas_renderer.camera.zoom * 16);
+		}
+		return 1; /* Rendering finished (won't change on next frame) */
+	});
+	tool.setEvent('mousedown mousemove', function (mouse) {
+		var chunkX = Math.floor(mouse.tileX / _conf.protocol.chunkSize);
+		var chunkY = Math.floor(mouse.tileY / _conf.protocol.chunkSize);
+		var chunk = _main.misc.world.getChunkAt(chunkX, chunkY);
+		switch (mouse.buttons) {
+			case 1:
+				if (!chunk.locked) {
+					_networking.net.protocol.protectChunk(chunkX, chunkY, 1);
+				}
+				break;
+
+			case 2:
+				if (chunk.locked) {
+					_networking.net.protocol.protectChunk(chunkX, chunkY, 0);
+				}
+				break;
+		}
+	});
+}));
+
+//Copy tool
+OWOP.tool.addToolObject(new OWOP.tool.class("Copy", OWOP.cursors.copy, OWOP.fx.player.NONE, OWOP.RANK.ADMIN, function (tool) {
+    function drawText(ctx, str, x, y, centered) {
         ctx.strokeStyle = "#000000", ctx.fillStyle = "#FFFFFF", ctx.lineWidth = 2.5, ctx.globalAlpha = 0.5;
         if (centered) {
             x -= ctx.measureText(str).width >> 1;
@@ -4507,10 +4469,10 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 			OWOP.player.tool = "paste";
         }
     });
-	}));
+}));
 
-  // Stamp tool
-	addTool(new Tool('Stamp', _tool_renderer.cursors.stamp, _Fx.PLAYERFX.NONE, _conf.RANK.ADMIN, function (tool) {
+//Paste tool 
+	addTool(new Tool('Paste', _tool_renderer.cursors.paste, _Fx.PLAYERFX.NONE, _conf.RANK.ADMIN, function (tool) {
 		tool.setFxRenderer(function (fx, ctx, time) {
 			var z = _canvas_renderer.camera.zoom;
 			var x = fx.extra.player.x;
@@ -4623,11 +4585,11 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 
 	_global.eventSys.emit(_conf.EVENTS.misc.toolsInitialized);
 });
-
+//tools tolbar
 _global.eventSys.once(_conf.EVENTS.init, function () {
 	exports.toolsWindow = toolsWindow = new _windowsys.GUIWindow('Tools', {}, function (wdow) {
 		wdow.container.id = "toole-container";
-		wdow.container.style.cssText = "max-width: 40px";
+		wdow.container.style.cssText = "max-width: 80px";
 	}).move(5, 32);
 });
 
@@ -4665,13 +4627,13 @@ exports.addWindow = addWindow;
 exports.delWindow = delWindow;
 exports.centerWindow = centerWindow;
 
-var _main = __webpack_require__(2);
+var _main = __webpack_require__(3);
 
 var _conf = __webpack_require__(1);
 
 var _global = __webpack_require__(0);
 
-var _misc = __webpack_require__(3);
+var _misc = __webpack_require__(2);
 
 var windowSys = exports.windowSys = {
 	windows: {},
@@ -4983,7 +4945,7 @@ var _networking = __webpack_require__(8);
 
 var _canvas_renderer = __webpack_require__(5);
 
-var _main = __webpack_require__(2);
+var _main = __webpack_require__(3);
 
 var _local_player = __webpack_require__(6);
 
@@ -5468,26 +5430,28 @@ var _conf = __webpack_require__(1);
 
 var _global = __webpack_require__(0);
 
+//tools position
+
 var cursors = exports.cursors = {
 	set: new Image(),
 	cursor: { imgpos: [0, 0], hotspot: [0, 0] },
 	move: { imgpos: [1, 0], hotspot: [18, 18] },
 	pipette: { imgpos: [0, 1], hotspot: [0, 28] },
 	erase: { imgpos: [0, 2], hotspot: [4, 26] },
-  areaerase: { imgpos: [4,1], hotspot: [0,0] },
 	zoom: { imgpos: [1, 2], hotspot: [19, 10] },
 	fill: { imgpos: [1, 1], hotspot: [3, 29] },
 	brush: { imgpos: [0, 3], hotspot: [0, 26] },
 	select: { imgpos: [2, 0], hotspot: [0, 0] }, // needs better hotspot
-	selectprotect: { imgpos: [4, 0], hotspot: [0, 0] },
-	clone: { imgpos: [3, 0], hotspot: [0, 0] }, // and this
-	stamp: { imgpos: [3, 1], hotspot: [10, 30] }, // this too
-	cut: { imgpos: [3, 2], hotspot: [0, 0] },
+	copy: { imgpos: [3, 0], hotspot: [0, 0] }, // and this
+	paste: { imgpos: [3, 1], hotspot: [0, 0] }, // this too
+	cut: { imgpos: [3, 2], hotspot: [11, 5] },
 	wand: { imgpos: [3, 3], hotspot: [0, 0] },
 	shield: { imgpos: [2, 3], hotspot: [18, 18] },
 	kick: { imgpos: [2, 1], hotspot: [3, 6] },
-	ban: { imgpos: [2, 2], hotspot: [10, 4] },
-	text: { imgpos: [1, 3], hotspot: [10, 4] // fix hotspot
+	areaprotect: { imgpos: [4, 0], hotspot: [0, 0] },
+	areaerase: { imgpos: [4, 1], hotspot: [0, 0] },
+	ban: { imgpos: [3, 0], hotspot: [10, 4] },
+	write: { imgpos: [1, 3], hotspot: [10, 4] // fix hotspot
 	} };
 
 _global.PublicAPI.cursors = cursors;
@@ -5643,7 +5607,7 @@ exports.Lerp = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _misc = __webpack_require__(3);
+var _misc = __webpack_require__(2);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6216,7 +6180,7 @@ var _Lerp = __webpack_require__(14);
 
 var _color = __webpack_require__(4);
 
-var _main = __webpack_require__(2);
+var _main = __webpack_require__(3);
 
 var _Fx = __webpack_require__(7);
 
@@ -6363,7 +6327,7 @@ var _World = __webpack_require__(12);
 
 var _Bucket = __webpack_require__(9);
 
-var _misc = __webpack_require__(3);
+var _misc = __webpack_require__(2);
 
 var _captcha = __webpack_require__(24);
 
@@ -6373,7 +6337,7 @@ var _local_player = __webpack_require__(6);
 
 var _canvas_renderer = __webpack_require__(5);
 
-var _main = __webpack_require__(2);
+var _main = __webpack_require__(3);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6402,7 +6366,6 @@ var OldProtocol = exports.OldProtocol = {
 	placeBucket: (_placeBucket = {}, _defineProperty(_placeBucket, _conf.RANK.NONE, [0, 1]), _defineProperty(_placeBucket, _conf.RANK.USER, [32, 4]), _defineProperty(_placeBucket, _conf.RANK.MODERATOR, [32, 2]), _defineProperty(_placeBucket, _conf.RANK.ADMIN, [32, 0]), _placeBucket),
 	maxMessageLength: (_maxMessageLength = {}, _defineProperty(_maxMessageLength, _conf.RANK.NONE, 128), _defineProperty(_maxMessageLength, _conf.RANK.USER, 128), _defineProperty(_maxMessageLength, _conf.RANK.MODERATOR, 512), _defineProperty(_maxMessageLength, _conf.RANK.ADMIN, 16384), _maxMessageLength),
 	tools: {
-		/* Renders the tools to other players */
 		id: {}, /* Generated automatically */
 		0: 'cursor',
 		1: 'move',
@@ -6410,20 +6373,13 @@ var OldProtocol = exports.OldProtocol = {
 		3: 'eraser',
 		4: 'zoom',
 		5: 'fill',
-		6: 'stamp',
+		6: 'paste',
 		7: 'export',
 		8: 'line',
-		9: 'protect',
-    10: 'selectprotect',
-    11: 'cut',
-    12: 'clone',
-    13: 'brush',
-    14: 'text',
-    15: 'kick',
-    16: 'areaerase'
+		9: 'protect'
 	},
 	misc: {
-		worldVerification: 4321,
+		worldVerification: 1234,
 		chatVerification: String.fromCharCode(10),
 		tokenVerification: 'CaptchA'
 	},
@@ -6581,24 +6537,22 @@ var OldProtocolImpl = function (_Protocol) {
 					updates = [];
 					for (var i = dv.getUint16(off, true), j = 0; j < i; j++) {
 						updated = true;
-						var bid = dv.getUint32(2 + off + j * 15, true);
-						var bpx = dv.getInt32(2 + off + j * 15 + 4, true);
-						var bpy = dv.getInt32(2 + off + j * 15 + 8, true);
-						var br = dv.getUint8(2 + off + j * 15 + 12);
-						var bg = dv.getUint8(2 + off + j * 15 + 13);
-						var bb = dv.getUint8(2 + off + j * 15 + 14);
+						var bpx = dv.getInt32(2 + off + j * 11, true);
+						var bpy = dv.getInt32(2 + off + j * 11 + 4, true);
+						var br = dv.getUint8(2 + off + j * 11 + 8);
+						var bg = dv.getUint8(2 + off + j * 11 + 9);
+						var bb = dv.getUint8(2 + off + j * 11 + 10);
 						var bbgr = bb << 16 | bg << 8 | br;
 						updates.push({
 							x: bpx,
 							y: bpy,
-							rgb: bbgr,
-							id: bid
+							rgb: bbgr
 						});
 					}
 					if (updated) {
 						_global.eventSys.emit(_conf.EVENTS.net.world.tilesUpdated, updates);
 					}
-					off += dv.getUint16(off, true) * 15 + 2;
+					off += dv.getUint16(off, true) * 11 + 2;
 					// Disconnects
 					var decreased = false;
 					updated = false;
@@ -6809,19 +6763,12 @@ var OldProtocolImpl = function (_Protocol) {
 		}
 	}, {
 		key: 'clearChunk',
-		value: function clearChunk(x, y, rgb) {
-			if (_local_player.player.rank == _conf.RANK.ADMIN || _local_player.player.rank == _conf.RANK.MODERATOR && this.placeBucket.canSpend(1)) {
-				var array = new ArrayBuffer(13);
-				var dv = new DataView(array);
-				dv.setInt32(0, x, true);
-				dv.setInt32(4, y, true);
-				dv.setUint8(8, rgb[0]);
-				dv.setUint8(9, rgb[1]);
-				dv.setUint8(10, rgb[2]);
-				this.ws.send(array);
-				return true;
-			}
-			return false;
+		value: function clearChunk(x, y) {
+			var array = new ArrayBuffer(9);
+			var dv = new DataView(array);
+			dv.setInt32(0, x, true);
+			dv.setInt32(4, y, true);
+			this.ws.send(array);
 		}
 	}]);
 
@@ -6918,11 +6865,11 @@ var _conf = __webpack_require__(1);
 
 var _global = __webpack_require__(0);
 
-var _misc = __webpack_require__(3);
+var _misc = __webpack_require__(2);
 
 var _windowsys = __webpack_require__(11);
 
-var _main = __webpack_require__(2);
+var _main = __webpack_require__(3);
 
 var SITEKEY = "6LcgvScUAAAAAARUXtwrM8MP0A0N70z4DHNJh-KI";
 
@@ -6966,7 +6913,15 @@ function requestVerification() {
 }
 
 function loadAndRequestCaptcha() {
-	loadCaptcha(requestVerification);
+	if (_main.misc.showEUCookieNag) {
+		_windowsys.windowSys.addWindow(new _windowsys.UtilDialog('Cookie notice', 'This box alerts you that we\'re going to use cookies!\nIf you don\'t accept their usage, disable cookies and reload the page.', false, function () {
+			(0, _misc.setCookie)('nagAccepted', 'true');
+			_main.misc.showEUCookieNag = false;
+			loadCaptcha(requestVerification);
+		}));
+	} else {
+		loadCaptcha(requestVerification);
+	}
 }
 
 /***/ }),
@@ -6998,3 +6953,4 @@ module.exports = __webpack_require__.p + "polyfill/canvas-toBlob.js";
 
 /***/ })
 /******/ ]);
+//# sourceMappingURL=app.js.map
