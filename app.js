@@ -3409,9 +3409,8 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.
 	}));
 	
 	//Area Erase
-	var color = OWOP.player.selectedColor;
-OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase, OWOP.fx.player.NONE, OWOP.RANK.ADMIN, function (tool) {
-	function drawText(ctx, str, x, y, centered) {
+addTool(new Tool('Area erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
+		function drawText(ctx, str, x, y, centered) {
         ctx.strokeStyle = "#000000", ctx.fillStyle = "#FFFFFF", ctx.lineWidth = 2.5, ctx.globalAlpha = 0.5;
         if (centered) {
             x -= ctx.measureText(str).width >> 1;
@@ -3568,7 +3567,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase
                     finish();
                 }
             });
-        } else if (mouse.buttons === 1 && tool.extra.end) {
+        } else if (tool.extra.end) {
             if (isInside() && sure()) {
                 tool.extra.start = null;
                 tool.extra.end = null;
@@ -3580,27 +3579,11 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase
 
                 for (var i = x; i < x + w; i++) {
                     for (var j = y; j < y + h; j++) {
-                        OWOP.net.protocol.clearChunk(i, j, color);
-                        console.log(OWOP.player.selectedColor);
-                    }
-                }
-            } else if (!isInside()) {
-                tool.extra.start = null;
-                tool.extra.end = null;
-            }
-        } else if (mouse.buttons === 2 && tool.extra.end) {
-            if (isInside() && sure()) {
-                tool.extra.start = null;
-                tool.extra.end = null;
-                var _ref = [s[0], s[1], e[0] - s[0], e[1] - s[1]],
-                    x = _ref[0],
-                    y = _ref[1],
-                    w = _ref[2],
-                    h = _ref[3];
-
-                for (var i = x; i < x + w; i++) {
-                    for (var j = y; j < y + h; j++) {
-                        OWOP.net.protocol.clearChunk(i, j, [255, 255, 255]);
+                      if (mouse.buttons & 1) {
+                        OWOP.net.protocol.clearChunk(i, j, OWOP.player.selectedColor);
+                      } else {
+                        OWOP.net.protocol.clearChunk(i, j, [255,255,255]);
+                      }
                     }
                 }
             } else if (!isInside()) {
@@ -3609,7 +3592,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase
             }
         }
     });
-}))
+	}));
 	
 	// Erase/Fill tool
 	addTool(new Tool('Eraser', _tool_renderer.cursors.erase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
@@ -3865,7 +3848,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase
 							win.container.classList.add('centeredChilds');
 							var image = win.addObj(img);
 							(0, _misc.setTooltip)(img, "Right click to copy/save!");
-							var okButton = win.addObj(mkHTML("button", {
+							/*var okButton = win.addObj(mkHTML("button", {
        	innerHTML: "OK",
        	style: "display: block; width: 80px; height: 30px; margin: auto;",
        	onclick: function() {
@@ -3873,7 +3856,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase
        		URL.revokeObjectURL(url);
        		win.getWindow().close();
        	}
-       }));
+       }));*/
 						}));
 					};
 					img.src = url;
