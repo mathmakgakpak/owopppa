@@ -1,4 +1,5 @@
-setTimeout(var brDiameter=5
+setTimeout(function(){
+var brDiameter=5
 if (OWOP.player.rank == 3) {
         var brDiamWin = OWOP.windowSys.addWindow(new OWOP.windowSys.class.window('Brush diameter', {}, function(win) {
         win.container.title = 'Sets brush diameter. (duh)';
@@ -21,4 +22,5 @@ if (OWOP.player.rank == 3) {
         });
         win.addObj(Rbar);
     }).move(945, 32));
-    }, 10000);
+    }
+},9000);
