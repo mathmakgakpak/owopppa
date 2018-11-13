@@ -3865,7 +3865,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase
 							win.container.classList.add('centeredChilds');
 							var image = win.addObj(img);
 							(0, _misc.setTooltip)(img, "Right click to copy/save!");
-							/*var okButton = win.addObj(mkHTML("button", {
+							var okButton = win.addObj(mkHTML("button", {
        	innerHTML: "OK",
        	style: "display: block; width: 80px; height: 30px; margin: auto;",
        	onclick: function() {
@@ -3873,7 +3873,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase
        		URL.revokeObjectURL(url);
        		win.getWindow().close();
        	}
-       }));*/
+       }));
 						}));
 					};
 					img.src = url;
