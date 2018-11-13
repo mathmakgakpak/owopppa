@@ -3410,7 +3410,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.
 	
 	//Area Erase
 	var color = OWOP.player.selectedColor;
-OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase, OWOP.fx.player.NONE, OWOP.RANK.ADMIN, function (tool) {
+OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.select, OWOP.fx.player.NONE, OWOP.RANK.ADMIN, function (tool) {
 	function drawText(ctx, str, x, y, centered) {
         ctx.strokeStyle = "#000000", ctx.fillStyle = "#FFFFFF", ctx.lineWidth = 2.5, ctx.globalAlpha = 0.5;
         if (centered) {
@@ -4078,7 +4078,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Area Erase", OWOP.cursors.areaerase
 	}));
 
 	//Area Protect
-	addTool(new Tool('Area Protect', _tool_renderer.cursors.areaprotect, _Fx.PLAYERFX.NONE, _conf.RANK.MODERATOR, function (tool) {
+	addTool(new Tool('Area Protect', _tool_renderer.cursors.select, _Fx.PLAYERFX.NONE, _conf.RANK.MODERATOR, function (tool) {
 		tool.setFxRenderer(function (fx, ctx, time) {
 			if (!fx.extra.isLocalPlayer) return 1;
 			var x = fx.extra.player.x;
@@ -5466,7 +5466,6 @@ var cursors = exports.cursors = {
 	shield: { imgpos: [2, 3], hotspot: [18, 18] },
 	kick: { imgpos: [2, 1], hotspot: [3, 6] },
 	areaprotect: { imgpos: [4, 0], hotspot: [0, 0] },
-	areaerase: { imgpos: [4, 1], hotspot: [0, 0] },
 	ban: { imgpos: [3, 0], hotspot: [10, 4] },
 	write: { imgpos: [1, 3], hotspot: [10, 4] // fix hotspot
 	} };
