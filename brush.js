@@ -1,5 +1,5 @@
 var brDiameter=5
-if (rank == 3) {
+if (player.rank == 3) {
         var brDiamWin = OWOP.windowSys.addWindow(new OWOP.windowSys.class.window('Brush diameter', {}, function(win) {
         win.container.title = 'Sets brush diameter. (duh)';
         win.container.style.height = '16px';
