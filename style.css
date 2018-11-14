@@ -149,7 +149,7 @@ button.winframe:active{
 	border-image:inherit
 }
 #chat,#dev-chat,#playercount-display,#xy-display,.whitetext{
-	color:#fff;
+	color:#ccffcc;
 	font:16px pixel-op,sans-serif;
 	text-shadow:-1px 0 #000,0 1px #000,1px 0 #000,0 -1px #000
 }
@@ -637,9 +637,9 @@ button:focus{
 	-ms-flex:0;
 	flex:0;
 	height:16px;
-	color:#fff;
+	color:#ccffcc;
 	pointer-events:all;
-	border:1px solid #666;
+	border:1px solid #737373;
 	padding:4px;
 	background:rgba(0,0,0,.8);
 	font-family:pixel-op,sans-serif;
