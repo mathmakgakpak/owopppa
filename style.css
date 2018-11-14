@@ -497,8 +497,8 @@ button:focus{
 	min-width:100%;
 	height:100%;
 	margin:0 -5px -5px;
-	background-color:#5e038f;
-	border:5px solid #5e038f;
+	background-color:#2f3035;
+	border:5px solid #2f3035;
 	border-width:5px;
 	-o-border-image:url(/img/window_in.png) 5 repeat;
 	border-image:url(/img/window_in.png) 5 repeat
