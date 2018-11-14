@@ -149,7 +149,7 @@ button.winframe:active{
 	border-image:inherit
 }
 #chat,#dev-chat,#playercount-display,#xy-display,.whitetext{
-	color:#ccffcc;
+	color:#0066ff;
 	font:16px pixel-op,sans-serif;
 	text-shadow:-1px 0 #000,0 1px #000,1px 0 #000,0 -1px #000
 }
@@ -329,7 +329,7 @@ button:focus{
 	top:-4px
 }
 #toole-container{
-	overflow:hidden
+	overflow:showed
 }
 #palette,#palette-create,#playercount-display,#xy-display,.framed{
 	border:5px solid #aba389;
@@ -637,7 +637,7 @@ button:focus{
 	-ms-flex:0;
 	flex:0;
 	height:16px;
-	color:#ccffcc;
+	color:#0066ff;
 	pointer-events:all;
 	border:1px solid #737373;
 	padding:4px;
