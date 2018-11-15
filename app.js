@@ -5449,6 +5449,7 @@ var cursors = exports.cursors = {
 	shield: { imgpos: [2, 3], hotspot: [18, 18] },
 	kick: { imgpos: [2, 1], hotspot: [3, 6] },
 	areaprotect: { imgpos: [4, 0], hotspot: [0, 0] },
+	protect: { imgpos: [4, 0], hotspot: [0, 0] },
 	areaerase: { imgpos: [4, 1], hotspot: [0, 0] },
 	ban: { imgpos: [3, 0], hotspot: [10, 4] },
 	write: { imgpos: [1, 3], hotspot: [10, 4] // fix hotspot
