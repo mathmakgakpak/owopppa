@@ -507,12 +507,19 @@ button:focus{
 	text-align:center
 }
 #help>.content>.links>a{
-	display:inline-block;
-	vertical-align:middle;
-	width:76px
+    display:inline-block;
+    vertical-align:middle;
+    width:25px;
+    height:74px;
+    transition:0.5s
+}
+#help>.content>.links:hover>a{
+    width:76px;
 }
 #help>.content>.links>a>img{
-	width:100%
+    width:100%;
+    height:100%;
+    object-fit:cover
 }
 #help.hidden{
 	display:none
