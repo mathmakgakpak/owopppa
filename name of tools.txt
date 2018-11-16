@@ -1,0 +1,5 @@
+Area Protect
+Area Erase
+Text
+Brush
+Copy

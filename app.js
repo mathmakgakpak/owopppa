@@ -3409,7 +3409,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.
 	}));
 	
 	//Area Erase
-addTool(new Tool('Area erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
+addTool(new Tool('Area Erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
 		function drawText(ctx, str, x, y, centered) {
         ctx.strokeStyle = "#000000", ctx.fillStyle = "#FFFFFF", ctx.lineWidth = 2.5, ctx.globalAlpha = 0.5;
         if (centered) {
@@ -4257,7 +4257,7 @@ addTool(new Tool('Area erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RE
 		});
 	}));
 
-//protect tool
+//Protect Tool
 addTool(new Tool('Protect', _tool_renderer.cursors.shield, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16, "#000000"), _conf.RANK.MODERATOR, function (tool) {
 	tool.setFxRenderer(function (fx, ctx, time) {
 		var x = fx.extra.player.x;
@@ -6367,7 +6367,7 @@ var OldProtocol = exports.OldProtocol = {
 	placeBucket: (_placeBucket = {}, _defineProperty(_placeBucket, _conf.RANK.NONE, [0, 1]), _defineProperty(_placeBucket, _conf.RANK.USER, [32, 4]), _defineProperty(_placeBucket, _conf.RANK.MODERATOR, [32, 2]), _defineProperty(_placeBucket, _conf.RANK.ADMIN, [32, 0]), _placeBucket),
 	maxMessageLength: (_maxMessageLength = {}, _defineProperty(_maxMessageLength, _conf.RANK.NONE, 128), _defineProperty(_maxMessageLength, _conf.RANK.USER, 128), _defineProperty(_maxMessageLength, _conf.RANK.MODERATOR, 512), _defineProperty(_maxMessageLength, _conf.RANK.ADMIN, 16384), _maxMessageLength),
 	tools: {
-		id: {}, /* Generated automatically */
+		id: {}, /* Generated automatically  showed tools*/
 		0: 'cursor',
 		1: 'move',
 		2: 'pipette',
@@ -6377,7 +6377,12 @@ var OldProtocol = exports.OldProtocol = {
 		6: 'paste',
 		7: 'export',
 		8: 'line',
-		9: 'protect'
+		9: 'protect',
+		10: 'area protect',
+		11: 'area erase',
+		12: 'text',
+		13: 'brush',
+		14: 'copy'
 	},
 	misc: {
 		worldVerification: 1234,
