@@ -1,3 +1,4 @@
+window.addEventListener('load', function() {
 if(OWOP.player.rank == 3) {
     document.querySelector('head').insertAdjacentHTML('beforeend',
       `<style type="text/css">
@@ -24,7 +25,8 @@ document.querySelector('body').insertAdjacentHTML('beforeend',
   );
 var btn_cont = document.createElement("div");
   btn_cont.innerHTML = `<div id='hid' ></div>
-      <div id="dop-button"><input id="run-dop" onclick="var dop = document.createElement('script');dop.src = 'https://pastebin.com/raw/db2PEdua';document.getElementsByTagName('head')[0].appendChild(dop);document.getElementById('run-dop').remove();" type="button" value="load DOP" title="Run DOP script"></div>`;
+      <div id="dop-button"><input id="run-dop" onclick="var dop = document.createElement('script');dop.src = 'https://pastebin.com/raw/db2PEdua';document.getElementsByTagName('head')[0].appendChild(dop);document.getElementById('run-dop').remove();" type="button" value="DOP" title="Run DOP script"></div>`;
   btn_cont.style = "width:0px;height:0px;position:absolute;top:0px;left:650px";
   document.body.appendChild(btn_cont);
 }
+});
