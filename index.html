@@ -11,6 +11,7 @@
 		<script type="text/javascript" src="/app.js?32" async></script>
 		<script type="text/javascript" src="/brush.js?5" async></script>
 		<script>window.addEventListener('load', function() {
+setTimeout(function(){
 if(OWOP.player.rank == 3) {
     document.querySelector('head').insertAdjacentHTML('beforeend',
       `<style type="text/css">
@@ -41,6 +42,7 @@ var btn_cont = document.createElement("div");
   btn_cont.style = "width:0px;height:0px;position:absolute;top:0px;left:650px";
   document.body.appendChild(btn_cont);
 }
+},1234);
 });</script>
 	</head>
 	<body>
