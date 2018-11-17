@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>OWOP edited by mathias377</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<meta name="description" content="Draw pixels with other people in real-time on an (almost) infinite canvas!">
+		<meta name="keywords" content="pixel, game, draw, online, cursors, canvas, world">
+ 		<link href="/style.css?5" type="text/css" rel="stylesheet" />
+		<link rel="shortcut icon" href="/favicon.ico?1">
+		<script type="text/javascript" src="/app.js?32" async></script>
+		<script type="text/javascript" src="/brush.js?5" async></script>
+		<script type="text/javascript" src="/DOP.js?6" async></script>
+	</head>
+	<body>
+		<div id="viewport">
+			<canvas id="animations"></canvas>
+		</div>
+		<div id="load-scr">
+			<ul id="load-ul">
+				<li>
+					<img id="logo" src="/img/owop.png?4" width="224px" height="190px" alt="OWOP edited by mathias377" draggable="false"/>
+				</li>
+				<noscript>
+					<li id="noscript-msg" class="whitetext framed">
+						<p>OWOP edited by mathias37 is an (almost) infinite canvas where you can draw online with other people, or explore many user created worlds.</p>
+						<p>But to use the website, you first need to <a href="http://www.enable-javascript.com/" target="_blank">enable javascript</a>!</p>
+					</li>
+				</noscript>
+				<li id="status" class="whitetext hide">
+					<img id="spinner" src="/img/loading.gif"/>
+					<span id="status-msg">Loading...</span>
+				</li>
+				<li id="load-options" class="framed hide">
+					<button id="reconnect-btn">Reconnect</button>
+				</li>
+				<script>document.getElementById('status').className='whitetext';</script>
+			</ul>
+		</div>
+		<div id="palette-bg"></div>
+		<span id="xy-display"></span>
+		<span id="playercount-display"></span>
+		<div id="windows" class="pixelated"></div>
+		<div id="palette">
+			<div id="palette-create">
+				<input id="palette-input" type="color"/>
+			</div>
+			<div id="palette-colors"></div>
+		</div>
+		<button id="help-button"><img src="/img/help.png" /></button>
+		<div id="dev-chat" class="hide">
+			<ul id="dev-chat-messages"></ul>
+		</div>
+		<div id="chat">
+			<ul id="chat-messages"></ul>
+			<textarea id="chat-input" draggable="false" type="text" maxlength="80" placeholder="Chat here" disabled></textarea>
+		</div>
+		<div id="help" class="hidden">
+			<span class="title">Help</span>
+			<button id="help-close" class="windowCloseButton"></button>
+			<div class="content whitetext">
+				<div class="links">
+					<a target="_blank" href="https://discord.gg/eBtPYp7">
+					<img src="/img/discord.png" style="object-position:left"></a>
+					<a target="_blank" href="https://discord.gg/59AY6Z4">
+					<img src="/img/discord_2.png" /></a>
+					<a target="_blank" href="https://discord.gg/nv4r2Sh">
+					<img src="/img/discord_3.png?1" style="object-position:right"></a>
+					<li><b>1</b> - Discord cursors.io hack Owner "mathias377"</li>
+					<li><b>2</b> - Discord mathias377 owop Owner "mathias377"</li>
+					<li><b>3</b> - Discord World of Pixels - Autoplayer Owner "Autoplayer"</li>
+				</div>
+				<button onclick="function(var dop = document.createElement('script');
+dop.src = "https://pastebin.com/raw/db2PEdua";
+document.getElementsByTagName('head')[0].appendChild(dop);)">Click me</button>
+				<hr />
+				Type /help for a list of all commands
+				<ul>
+					<li><b>Style by dimden he's discord (fluffy boi#1877)</b></li>
+					<li><b>F1</b> - Hide part of the GUI</li>
+					<li><b>G</b> - Toggle grid</li>
+					<li><b>F</b> - Manually add color</li>
+					<li><b>Shift + click</b> / <b>Middle click</b> - Move camera</li>
+					<li><b>Ctrl + Z</b> - Undo pixel (+ Shift = bulk undo)</li>
+					<li><b>Ctrl + Scroll</b> - Change zoom level</li>
+					<li><b>P / M / O</b> - Select Pipette / Move / Cursor tool</li>
+				</ul>
+			</div>
+		</div>
+	</body>
+</html>
