@@ -1382,7 +1382,7 @@ function init() {
 
 	updateXYDisplay(0, 0);
 
-	var worldName = decodeURIComponent(window.location.pathname);
+	var worldName = decodeURIComponent(window.location.slice(1));
 	if (worldName[0] === '/') {
 		worldName = worldName.slice(1);
 	}
