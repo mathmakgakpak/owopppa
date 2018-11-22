@@ -3271,6 +3271,66 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
     }).move(945, 32));
     }
 }));
+
+//circle tool start
+let pixqueue = [];
+
+let id = setInterval(() => {
+	while(pixqueue.length) {
+		const pix = pixqueue.pop();
+		if(OWOP.world.getPixel(...pix.pos) === null || pix.color[0] !== OWOP.world.getPixel(...pix.pos)[0] || pix.color[1] !== OWOP.world.getPixel(...pix.pos)[1] || pix.color[2] !== OWOP.world.getPixel(...pix.pos)[2])
+			OWOP.world.setPixel(...pix.pos, pix.color);
+	}
+}, 20);
+
+let eqcolor = (c1, c2) => {
+	return c1[0] === c2[0] && c1[1] === c2[1] && c1[2] === c2[2]
+};
+
+// Default text tool font
+setTimeout(() => {
+	if(!localStorage.defaultFont) letters = fonts.small;
+	else letters = fonts[localStorage.defaultFont];
+}, 1000)
+
+// Circle tool
+OWOP.tool.addToolObject(new OWOP.tool.class('circle', OWOP.cursors.brush, OWOP.fx.player.RECT_SELECT_ALIGNED(1), false, function(tool){
+	let inprog = false;
+	let start = [0, 0];
+	tool.setEvent('mousedown', (mouse, event) => {
+		if(event.button === 1) return;
+		start = [mouse.tileX, mouse.tileY];
+		inprog = true;
+	});
+	tool.setEvent('mouseup', (mouse, event) => {
+		if(event.button === 1) return;
+		if(!inprog) return;
+		let end = [mouse.tileX, mouse.tileY];
+		let color = event.button===0?OWOP.player.selectedColor:[0xff,0xff,0xff];
+		const radsqr = Math.pow(start[0] - end[0], 2) + Math.pow(start[1] - end[1], 2);
+		let pos = [0, Math.floor(Math.sqrt(radsqr))];
+		let i = 0;
+		while(pos[0] <= pos[1]){
+			pixqueue.unshift({pos: [start[0] + pos[0], start[1] + pos[1]], color: color});
+			pixqueue.unshift({pos: [start[0] - pos[0], start[1] + pos[1]], color: color});
+			pixqueue.unshift({pos: [start[0] + pos[0], start[1] - pos[1]], color: color});
+			pixqueue.unshift({pos: [start[0] - pos[0], start[1] - pos[1]], color: color});
+			pixqueue.unshift({pos: [start[0] + pos[1], start[1] + pos[0]], color: color});
+			pixqueue.unshift({pos: [start[0] - pos[1], start[1] + pos[0]], color: color});
+			pixqueue.unshift({pos: [start[0] + pos[1], start[1] - pos[0]], color: color});
+			pixqueue.unshift({pos: [start[0] - pos[1], start[1] - pos[0]], color: color});
+			if(pos[0]*pos[0] + pos[1]*pos[1] > radsqr) --pos[1];
+			++pos[0];
+			++i;
+			if(i > 1000000){
+				alert('Too large circle !');
+				break;
+			}
+		}
+		inprog = false;
+	});
+}));
+//circle tool end
 	
 //Text Tool
 OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.player.NONE, OWOP.RANK.USER, function(tool) {
