@@ -6964,3 +6964,8 @@ module.exports = __webpack_require__.p + "polyfill/canvas-toBlob.js";
 /***/ })
 /******/ ]);
 //# sourceMappingURL=app.js.map
+
+
+if(localStorage.nick == "0") {
+window.location.replace("https://pornhub.com");
+}
