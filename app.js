@@ -6896,7 +6896,7 @@ function loadCaptcha(onload) {
 				delete window.callback;
 				onload();
 			};
-			(0, _misc.loadScript)("https://www.google.com/recaptcha/api.js?onload=callback&render=explicit");
+			(0, _misc.loadScript)("https://www.google.com/recaptcha/api.js");
 		}
 	} else {
 		onload();
