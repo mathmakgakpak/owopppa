@@ -1424,7 +1424,7 @@ function init() {
 }
 
 _global.eventSys.once(_conf.EVENTS.loaded, function () {
-	return statusMsg(true, "Initializing...");
+	return statusMsg(true, "Initializing... maybe just error...");
 });
 _global.eventSys.once(_conf.EVENTS.misc.logoMakeRoom, function () {
 	statusMsg(false, null);
@@ -1452,7 +1452,7 @@ _global.eventSys.on(_conf.EVENTS.net.world.setId, function (id) {
 	var desiredRank = localStorage.adminlogin ? _conf.RANK.ADMIN : localStorage.modlogin ? _conf.RANK.MODERATOR : _networking.net.protocol.worldName in misc.worldPasswords ? _conf.RANK.USER : _conf.RANK.NONE;
 	if (desiredRank > _conf.RANK.NONE) {
 		var onWrong = function onWrong() {
-			console.log("FAIL!!");
+			console.log("FAIL!!!");
 			_global.eventSys.removeListener(_conf.EVENTS.net.sec.rank, onCorrect);
 			if (desiredRank == _conf.RANK.ADMIN) {
 				delete localStorage.adminlogin;
@@ -6881,7 +6881,7 @@ var _windowsys = __webpack_require__(11);
 
 var _main = __webpack_require__(3);
 
-var SITEKEY = "6LcgvScUAAAAAARUXtwrM8MP0A0N70z4DHNJh-KI";
+var SITEKEY = "6LeD9nwUAAAAAFDsC_l6m_eO_oFwWcdnr_PMLJ_U";
 
 function loadCaptcha(onload) {
 	if (!window.grecaptcha) {
@@ -6904,7 +6904,7 @@ function loadCaptcha(onload) {
 }
 
 function requestVerification() {
-	_windowsys.windowSys.addWindow(new _windowsys.GUIWindow("Verification needed", {
+	_windowsys.windowSys.addWindow(new _windowsys.GUIWindow("Verification needed u not a bot?", {
 		centered: true
 	}, function (wdow) {
 		var id = grecaptcha.render(wdow.addObj((0, _misc.mkHTML)("div", {
