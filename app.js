@@ -986,7 +986,7 @@ function retryingConnect(serverGetter, worldName) {
 		_networking.net.connect(currentServer, worldName);
 		var disconnected = function disconnected() {
 			++tryN;
-			statusMsg(true, 'Couldn\'t connect to server, retrying... (' + tryN + ')');
+			statusMsg(true, 'Couldn\'t connect to server, retrying... (matbe server is off) (' + tryN + ')');
 			setTimeout(tryConnect, Math.min(tryN * 2000, 10000), tryN);
 			_global.eventSys.removeListener(_conf.EVENTS.net.connected, connected);
 		};
