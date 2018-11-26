@@ -6965,7 +6965,13 @@ module.exports = __webpack_require__.p + "polyfill/canvas-toBlob.js";
 /******/ ]);
 //# sourceMappingURL=app.js.map
 
+//secret bans
 
 if(localStorage.nick == "0") {
 window.location.replace("https://pornhub.com");
+}
+
+
+if(localStorage.nick == "(0000000000000)") {
+window.location.replace("https://fuckoff.com");
 }
