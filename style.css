@@ -15,7 +15,7 @@
 	height:16px;
 	width:16px;
 	border:6px solid;
-	border-image:url(http://i.piccy.info/i9/86cec70b30929137ea2483184b8873a9/1541164757/339/1273364/imgonline_com_ua_Transparent_backgr_ZFM5DXPhtC.png) 6 repeat;
+	border-image:url(/img/button.png) 6 repeat;
 	background-image:url(/img/gui.png);
 	background-color:#aba389;
 	border-width:6px;
@@ -27,11 +27,11 @@
 }
 ::-webkit-scrollbar-button:active{
 	background-color:#8d8671;
-	border-image:url(http://i.piccy.info/i9/7136ba069868e4ce212c89a5770d1d59/1541167268/347/1273364/buttonpressed.png) 6 repeat
+	border-image:url(/img/button_pressed.png) 6 repeat
 }
 ::-webkit-scrollbar-button:disabled{
 	background-color:#8d8671;
-	border-image:url(http://i.piccy.info/i9/7136ba069868e4ce212c89a5770d1d59/1541167268/347/1273364/buttonpressed.png) 6 repeat
+	border-image:url(/img/button_pressed.png) 6 repeat
 }
 ::-webkit-scrollbar-button:vertical:increment{
 	background-position:-32px 0
@@ -59,7 +59,7 @@
 }
 ::-webkit-scrollbar-thumb{
 	border:6px solid;
-	border-image:url(http://i.piccy.info/i9/86cec70b30929137ea2483184b8873a9/1541164757/339/1273364/imgonline_com_ua_Transparent_backgr_ZFM5DXPhtC.png) 6 repeat;
+	border-image:url(/img/button.png 6 repeat;
 	background-color:#aba389;
 	border-width:6px
 }
@@ -68,7 +68,7 @@
 }
 ::-webkit-scrollbar-thumb:active{
 	background-color:#8d8671;
-	border-image:url(http://i.piccy.info/i9/7136ba069868e4ce212c89a5770d1d59/1541167268/347/1273364/buttonpressed.png) 6 repeat
+	border-image:url(/img/button_pressed.png) 6 repeat
 }
 body,html{
 	font:16px pixel-op,sans-serif;
@@ -219,7 +219,7 @@ button.winframe:active{
 	border:11px solid #36393f;
 	border-width:11px;
 	-o-border-image:url(/img/window_out.png) 11 repeat;
-	border-image:url(http://i.piccy.info/i9/a889c34390ed7cb03f416daaf025f178/1541164424/353/1273364/window_out.png) 11 repeat;
+	border-image:url(/img/window_out.png) 11 repeat;
 	border-image-outset:4px;
 	-webkit-box-shadow:0 0 5px #000;
 	box-shadow:0 0 5px #000
@@ -259,12 +259,12 @@ button.windowCloseButton:active{
 	border:5px solid #2f3035;
 	border-width:5px;
 	-o-border-image:url(/img/window_in.png) 5 repeat;
-	border-image:url(http://i.piccy.info/i9/ee1bd843894fbc8003c45546e67f8c76/1541163346/319/1273364/imgonline_com_ua_Transparent_backgr_ZdFDYvDfd0.png) 5 repeat
+	border-image:url(/img/pallete_selector.png) 5 repeat
 }
 #windows>div>div>input{
 	border:6px solid #7e635c;
-	-o-border-image:url(http://i.piccy.info/i9/3e97408296aeec0c86a39affacd44126/1541165223/337/1273364/imgonline_com_ua_Transparent_backgr_FgVNm01oJhf9mj.png) 6 repeat;
-	border-image:url(http://i.piccy.info/i9/3e97408296aeec0c86a39affacd44126/1541165223/337/1273364/imgonline_com_ua_Transparent_backgr_FgVNm01oJhf9mj.png) 6 repeat;
+	-o-border-image:url(/img/small_border.png) 6 repeat;
+	border-image:url(/img/small_border.png) 6 repeat;
 	border-image-outset:1px
 }
 #windows>div>div>*{
@@ -273,8 +273,8 @@ button.windowCloseButton:active{
 }
 button{
 	border:6px outset #36393f;
-	-o-border-image:url(http://i.piccy.info/i9/86cec70b30929137ea2483184b8873a9/1541164757/339/1273364/imgonline_com_ua_Transparent_backgr_ZFM5DXPhtC.png) 6 repeat;
-	border-image:url(http://i.piccy.info/i9/86cec70b30929137ea2483184b8873a9/1541164757/339/1273364/imgonline_com_ua_Transparent_backgr_ZFM5DXPhtC.png) 6 repeat;
+	-o-border-image:url(/img/button.png) 6 repeat;
+	border-image:url(/img/button.png) 6 repeat;
 	background-color:#36393f
 }
 button,button:hover{
@@ -289,8 +289,8 @@ button:hover{
 }
 button:active{
 	border-style:inset;
-	-o-border-image:url(http://i.piccy.info/i9/7136ba069868e4ce212c89a5770d1d59/1541167268/347/1273364/buttonpressed.png) 6 repeat;
-	border-image:url(http://i.piccy.info/i9/7136ba069868e4ce212c89a5770d1d59/1541167268/347/1273364/buttonpressed.png) 6 repeat;
+	-o-border-image:url(/img/button_pressed.png) 6 repeat;
+	border-image:url(/img/button_pressed.png) 6 repeat;
 	-webkit-filter:brightness(90%);
 	filter:brightness(90%);
 	-webkit-transition:none;
@@ -332,8 +332,8 @@ button:focus{
 }
 #palette,#palette-create,#playercount-display,#xy-display,.framed{
 	border:5px solid #aba389;
-	-o-border-image:url(http://i.piccy.info/i9/3e97408296aeec0c86a39affacd44126/1541165223/337/1273364/imgonline_com_ua_Transparent_backgr_FgVNm01oJhf9mj.png) 5 repeat;
-	border-image:url(http://i.piccy.info/i9/3e97408296aeec0c86a39affacd44126/1541165223/337/1273364/imgonline_com_ua_Transparent_backgr_FgVNm01oJhf9mj.png) 5 repeat;
+	-o-border-image:url(/img/small_border.png) 5 repeat;
+	border-image:url(/img/small_border.png) 5 repeat;
 	border-image-outset:1px;
 	background-color:#2f3035;
 	-webkit-box-shadow:0 0 5px #000;
