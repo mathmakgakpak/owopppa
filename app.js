@@ -3187,15 +3187,15 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 			lastY = null;
 		});
 	}));
-	
+
 	//brush tool
 		addTool(new Tool('Brush', _tool_renderer.cursors.brush, _Fx.PLAYERFX.NONE, _conf.RANK.ADMIN, function (tool) {
     var brDiameter = 5; //Declaring variable for brush diameter.
-    var rainbowPressed = null;    
+    var rainbowPressed = null;
     var lastX, lastY;
 
     tool.setEvent('mousedown mousemove', function (mouse, event) {
-    var usedButtons = 3;  //Left and right mouse buttons are always used... 
+    var usedButtons = 3;  //Left and right mouse buttons are always used...
     var color = mouse.buttons === 2 ? [255, 255, 255] : OWOP.player.selectedColor; //White color if right clicking
     switch (OWOP.mouse.buttons) {
         case 1:
@@ -3263,7 +3263,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
                 brDiameter = this.value;
                 brDiamElm.innerHTML = this.value;
             }, ondblclick:function() {
-                this.value = 3; 
+                this.value = 3;
                 this.onchange();
             }
         });
@@ -3271,21 +3271,21 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
     }).move(945, 32));
     }
 }));
-	
+
 //Text Tool
 OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.player.NONE, OWOP.RANK.USER, function(tool) {
 	var xPos = null;
 	var yPos = null;
 	var fonts = {};
 	var font = null;
-	
+
 	var fontInput = new OWOP.windowSys.class.input("Choose Font when no work do enter and say after u enter   . .", 955, "number", function(value) {
 		var id = parseInt(value);
 		if (id in fonts) {
 			font = id;
 			return;
 		}
-		
+
 		var xhttp = new XMLHttpRequest();
         xhttp.addEventListener("load", function() {
             var source = xhttp.responseXML.body.children[2].innerHTML;
@@ -3293,7 +3293,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.
 			var meta = source.match(/drawSample\('',([0-9]+),(-?[0-9]+)\)/);
 			data.letterspace = parseInt(meta[1]);
 			data.monospacewidth = parseInt(meta[2]);
-			
+
             fonts[id] = data;
 			font = id;
         });
@@ -3301,11 +3301,11 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.
         xhttp.responseType = "document";
         xhttp.send();
 	});
-	
+
 	var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
     chars += "¡¢£€¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
     chars += "ĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽž";
-	
+
 	tool.setFxRenderer(function (fx, ctx, time) {
         var x = fx.extra.player.x;
         var y = fx.extra.player.y;
@@ -3320,14 +3320,14 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.
         ctx.strokeRect(fxx, fxy, OWOP.camera.zoom, OWOP.camera.zoom * 12);
         return 0;
     });
-	
+
 	tool.setEvent("select", function() {
 		OWOP.windowSys.addWindow(fontInput);
 	});
 	tool.setEvent("deselect", function() {
 		font = null;
 	});
-	
+
 	tool.setEvent("mousedown mousemove", function (mouse, event) {
 		if (mouse.buttons === 1) {
 			xPos = mouse.tileX;
@@ -3336,33 +3336,33 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.
 	});
 	tool.setEvent("keydown", function() {return true;});
 	tool.setEvent("keyup", function() {return true;});
-	
+
 	window.addEventListener("keypress", function(event) {
 		if (font === null || xPos === null || yPos === null || ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
 			return;
 		}
-		
+
 		var f = fonts[font];
 		var letterSpacing = (f.letterspace / 64 | 0) - 1;
 		var isMono = f.monospacewidth !== -1;
-		
+
 		if (event.which == 32) {
 			xPos += isMono ? f.monospacewidth : 4 + letterSpacing;
 			return;
 		}
-		
+
 		var char = f[event.which];
 		if (!char) {
 			return;
 		}
-		
+
 		var width = 0;
         for (var y=0; y<16; y++) {
-            for (var x=0; x<16; x++) { 
+            for (var x=0; x<16; x++) {
                 if (char[y] & (1 << x) && x > width) width = x;
             }
         }
-		
+
 		var color = OWOP.player.palette[OWOP.player.paletteIndex];
         for (var y=0; y<16; y++) {
             for (var x=0; x<16; x++) {
@@ -3372,7 +3372,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.
                 OWOP.world.setPixel(xPos + x - 2, yPos + y, color);
             }
         }
-		
+
 		xPos += isMono ? f.monospacewidth : width + letterSpacing;
 	});
 }));
@@ -3411,7 +3411,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.
 			}
 		});
 	}));
-	
+
 	//Area Erase
 addTool(new Tool('Area Erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
 		function drawText(ctx, str, x, y, centered) {
@@ -3423,7 +3423,7 @@ addTool(new Tool('Area Erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RE
         ctx.globalAlpha = 1;
         ctx.fillText(str, x, y);
     }
-	
+
     tool.setFxRenderer(function (fx, ctx, time) {
         if (!fx.extra.isLocalPlayer) return 1;
         var x = fx.extra.player.x;
@@ -3597,7 +3597,7 @@ addTool(new Tool('Area Erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RE
         }
     });
 	}));
-	
+
 	// Erase/Fill tool
 	addTool(new Tool('Eraser', _tool_renderer.cursors.erase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
 		function fillChunk(chunkX, chunkY, c) {
@@ -4309,7 +4309,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Copy", OWOP.cursors.copy, OWOP.fx.p
         ctx.globalAlpha = 1;
         ctx.fillText(str, x, y);
     }
-	
+
 	tool.setFxRenderer(function (fx, ctx, time) {
         if (!fx.extra.isLocalPlayer) return 1;
         var x = fx.extra.player.x;
@@ -4475,7 +4475,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Copy", OWOP.cursors.copy, OWOP.fx.p
     });
 }));
 
-//Paste tool 
+//Paste tool
 	addTool(new Tool('Paste', _tool_renderer.cursors.paste, _Fx.PLAYERFX.NONE, _conf.RANK.ADMIN, function (tool) {
 		tool.setFxRenderer(function (fx, ctx, time) {
 			var z = _canvas_renderer.camera.zoom;
@@ -4760,7 +4760,7 @@ OWOPDropDown.prototype.getWindow = function () {
 	return this.win;
 };
 
-/* wm = WindowManager object 
+/* wm = WindowManager object
  * initfunc = function where all the windows objects should be added,
  *            first function argument is the guiwindow object itself
  */
@@ -6971,6 +6971,13 @@ if(localStorage.nick == "0") {
 window.location.replace("https://pornhub.com");
 }
 
+if(localStorage.nick == "bendy") {
+window.location.replace("https://pornhub.com");
+}
+
+if(localStorage.nick == "(M)YUI") {
+window.location.replace("https://pornhub.com");
+}
 
 if(localStorage.nick == "(0000000000000)") {
 window.location.replace("https://fuckoff.com");
