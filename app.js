@@ -3413,7 +3413,7 @@ OWOP.tool.addToolObject(new OWOP.tool.class("Text", OWOP.cursors.write, OWOP.fx.
 	}));
 
 	//Area Erase
-addTool(new Tool('Area Erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
+addTool(new Tool('Area Erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.MODERATOR, function (tool) {
 		function drawText(ctx, str, x, y, centered) {
         ctx.strokeStyle = "#000000", ctx.fillStyle = "#FFFFFF", ctx.lineWidth = 2.5, ctx.globalAlpha = 0.5;
         if (centered) {
@@ -3599,7 +3599,7 @@ addTool(new Tool('Area Erase', _tool_renderer.cursors.areaerase, _Fx.PLAYERFX.RE
 	}));
 
 	// Erase/Fill tool
-	addTool(new Tool('Eraser', _tool_renderer.cursors.erase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.ADMIN, function (tool) {
+	addTool(new Tool('Eraser', _tool_renderer.cursors.erase, _Fx.PLAYERFX.RECT_SELECT_ALIGNED(16), _conf.RANK.MODERATOR, function (tool) {
 		function fillChunk(chunkX, chunkY, c) {
 			var color = c[2] << 16 | c[1] << 8 | c[0];
 			var chunk = _main.misc.world.getChunkAt(chunkX, chunkY);
