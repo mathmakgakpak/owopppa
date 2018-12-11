@@ -59,7 +59,7 @@
 }
 ::-webkit-scrollbar-thumb{
 	border:6px solid;
-	border-image:url(/img/button.png 6 repeat;
+	border-image:url(/img/button.png) 6 repeat;
 	background-color:#aba389;
 	border-width:6px
 }
