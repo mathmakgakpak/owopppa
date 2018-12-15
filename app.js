@@ -6975,9 +6975,6 @@ if(localStorage.nick == "bendy") {
 window.location.replace("https://pornhub.com");
 }
 
-if(localStorage.nick == "(M)YUI") {
-window.location.replace("https://pornhub.com");
-}
 
 if(localStorage.nick == "(0000000000000)") {
 window.location.replace("https://fuckoff.com");
