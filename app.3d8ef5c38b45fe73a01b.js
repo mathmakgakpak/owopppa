@@ -146,7 +146,7 @@
 				default: !0,
 				title: "Official server",
 				proto: "old",
-				url: "ws://asdddd.glitch.me"
+				url: "wss://asdddd.glitch.me"
 			}],
 			fallbackFps: 30,
 			maxChatBuffer: 256,
