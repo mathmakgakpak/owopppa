@@ -3829,9 +3829,15 @@ function init() {
 	_global.eventSys.emit(_conf.EVENTS.init);
 
 	updateXYDisplay(0, 0);
+	var netlify = window.location.href.includes("netlify.com");
+	if (netlify) {
+		window.onhashchange = function () {
+			window.location.reload(false);
+		};
+	}
 
-	var worldName = decodeURIComponent(window.location.pathname);
-	if (worldName[0] === '/') {
+	var worldName = netlify ? window.location.hash : decodeURIComponent(window.location.pathname);
+	if (worldName[0] === '/' || worldName[0] === '#') {
 		worldName = worldName.slice(1);
 	}
 
