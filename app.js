@@ -6285,7 +6285,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 						for (var j = y; j < y + h; j++) {
 							var chunk = _main.misc.world.getChunkAt(i, j);
 							if (chunk && !chunk.locked) {
-								_networking.net.protocol.clearChunk(i, j, [255, 255, 255]);
+								_networking.net.protocol.clearChunk(i, j, _local_player.player.selectedColor);
 							}
 						}
 					}
@@ -6307,7 +6307,7 @@ _global.eventSys.once(_conf.EVENTS.misc.toolsRendered, function () {
 						for (var j = y; j < y + h; j++) {
 							var chunk = _main.misc.world.getChunkAt(i, j);
 							if (chunk && !chunk.locked) {
-								_networking.net.protocol.clearChunk(i, j, _local_player.player.selectedColor);
+								_networking.net.protocol.clearChunk(i, j, [255, 255, 255]);
 							}
 						}
 					}
